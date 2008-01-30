@@ -901,11 +901,9 @@ namespace FlickrNetScreensaver
             switch (Settings.Default.ShowType)
 			{
 				case "Everyone":
-					//TabControl.SelectedIndex = 2;
 					LoadEveryone();
 					break;
 				case "Group":
-					//TabControl.SelectedIndex = 1;
 					LoadGroup();
 					break;
 				case "User":
@@ -968,7 +966,6 @@ namespace FlickrNetScreensaver
 
 		private void LoadUser()
 		{
-			//TabControl.SelectedIndex = 0;
             SelectUser.Checked = true;
 
             UserName.Text = Settings.Default.ShowUserUsername;
@@ -999,13 +996,11 @@ namespace FlickrNetScreensaver
 		private void LoadGroup()
 		{
             SelectGroup.Checked = true;
-			//TabControl.SelectedIndex = 1;
 			GroupName.Text = Settings.Default.ShowGroupName;
 		}
 
 		private void LoadEveryone()
 		{
-			//TabControl.SelectedIndex = 2;
             SelectEveryone.Checked = true;
 
             switch (Settings.Default.ShowEveryoneType)

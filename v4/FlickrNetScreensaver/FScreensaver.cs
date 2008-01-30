@@ -40,6 +40,7 @@ namespace FlickrNetScreensaver
 		private System.Windows.Forms.Timer TimerReloadPhotos;
 		private System.Windows.Forms.Timer TimerLoadNextPhoto;
 		Point MouseXY = Point.Empty;
+        private BackgroundWorker loadNextPhotoWorker;
 		private System.Windows.Forms.PictureBox flickrImage;
 
 		public FScreensaver(int screenNumber)
@@ -80,49 +81,59 @@ namespace FlickrNetScreensaver
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.components = new System.ComponentModel.Container();
-			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(FScreensaver));
-			this.TimerLoadNextPhoto = new System.Windows.Forms.Timer(this.components);
-			this.flickrImage = new System.Windows.Forms.PictureBox();
-			this.TimerReloadPhotos = new System.Windows.Forms.Timer(this.components);
-			this.SuspendLayout();
-			// 
-			// TimerLoadNextPhoto
-			// 
-			this.TimerLoadNextPhoto.Interval = 60000;
-			this.TimerLoadNextPhoto.Tick += new System.EventHandler(this.TimerLoadNextPhoto_Tick);
-			// 
-			// flickrImage
-			// 
-			this.flickrImage.Image = ((System.Drawing.Image)(resources.GetObject("flickrImage.Image")));
-			this.flickrImage.Location = new System.Drawing.Point(0, 0);
-			this.flickrImage.Name = "flickrImage";
-			this.flickrImage.Size = new System.Drawing.Size(90, 30);
-			this.flickrImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-			this.flickrImage.TabIndex = 1;
-			this.flickrImage.TabStop = false;
-			// 
-			// TimerReloadPhotos
-			// 
-			this.TimerReloadPhotos.Tick += new System.EventHandler(this.TimerReloadPhotos_Tick);
-			// 
-			// FScreensaver
-			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.BackColor = System.Drawing.Color.Black;
-			this.ClientSize = new System.Drawing.Size(292, 266);
-			this.Controls.Add(this.flickrImage);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-			this.KeyPreview = true;
-			this.Name = "FScreensaver";
-			this.Text = "Flickr Screensaver";
-			this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.FScreensaver_MouseMove);
-			this.Closing += new System.ComponentModel.CancelEventHandler(this.FScreensaver_Closing);
-			this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.FScreensaver_KeyPress);
-			this.Load += new System.EventHandler(this.FScreensaver_Load);
-			this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.FScreensaver_MouseMove);
-			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.FScreensaver_MouseMove);
-			this.ResumeLayout(false);
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FScreensaver));
+            this.TimerLoadNextPhoto = new System.Windows.Forms.Timer(this.components);
+            this.flickrImage = new System.Windows.Forms.PictureBox();
+            this.TimerReloadPhotos = new System.Windows.Forms.Timer(this.components);
+            this.loadNextPhotoWorker = new System.ComponentModel.BackgroundWorker();
+            ((System.ComponentModel.ISupportInitialize)(this.flickrImage)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // TimerLoadNextPhoto
+            // 
+            this.TimerLoadNextPhoto.Interval = 60000;
+            this.TimerLoadNextPhoto.Tick += new System.EventHandler(this.TimerLoadNextPhoto_Tick);
+            // 
+            // flickrImage
+            // 
+            this.flickrImage.Image = ((System.Drawing.Image)(resources.GetObject("flickrImage.Image")));
+            this.flickrImage.Location = new System.Drawing.Point(0, 0);
+            this.flickrImage.Name = "flickrImage";
+            this.flickrImage.Size = new System.Drawing.Size(90, 30);
+            this.flickrImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.flickrImage.TabIndex = 1;
+            this.flickrImage.TabStop = false;
+            // 
+            // TimerReloadPhotos
+            // 
+            this.TimerReloadPhotos.Tick += new System.EventHandler(this.TimerReloadPhotos_Tick);
+            // 
+            // loadNextPhotoWorker
+            // 
+            this.loadNextPhotoWorker.WorkerSupportsCancellation = true;
+            this.loadNextPhotoWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.loadNextPhotoWorker_DoWork);
+            this.loadNextPhotoWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.loadNextPhotoWorker_RunWorkerCompleted);
+            // 
+            // FScreensaver
+            // 
+            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+            this.BackColor = System.Drawing.Color.Black;
+            this.ClientSize = new System.Drawing.Size(292, 266);
+            this.Controls.Add(this.flickrImage);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.KeyPreview = true;
+            this.Name = "FScreensaver";
+            this.Text = "Flickr Screensaver";
+            this.Load += new System.EventHandler(this.FScreensaver_Load);
+            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.FScreensaver_MouseMove);
+            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.FScreensaver_MouseMove);
+            this.Closing += new System.ComponentModel.CancelEventHandler(this.FScreensaver_Closing);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.FScreensaver_KeyPress);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.FScreensaver_MouseMove);
+            ((System.ComponentModel.ISupportInitialize)(this.flickrImage)).EndInit();
+            this.ResumeLayout(false);
+            this.PerformLayout();
 
 		}
 		#endregion
@@ -307,19 +318,15 @@ namespace FlickrNetScreensaver
 			StartDoNextPhoto();
 		}
 
-		private Thread thread;
-
 		private void StartDoNextPhoto()
 		{
 			Logger.Debug("Starting next photo - Enter");
-            Logger.Debug("Memory = " + Environment.WorkingSet);
 
-			if( thread != null && thread.ThreadState == ThreadState.Running ) return;
+            if (loadNextPhotoWorker.IsBusy) return;
 
 			TimerLoadNextPhoto.Stop();
 
-			thread = new Thread(new ThreadStart(DoLoadNextPhoto));
-			thread.Start();
+            loadNextPhotoWorker.RunWorkerAsync();
 
 			Logger.Debug("Starting next photo - Exit");
 		}
@@ -327,12 +334,6 @@ namespace FlickrNetScreensaver
 		private void MoveFlickrImage()
 		{
             Logger.Debug("MoveFlickrImage");
-
-            if (InvokeRequired)
-            {
-                Invoke((MethodInvoker)delegate() { MoveFlickrImage(); });
-                return;
-            }
 
 			if( flickrImage.Top == 0 && flickrImage.Left == 0 )
 			{
@@ -350,51 +351,38 @@ namespace FlickrNetScreensaver
 			{
 				flickrImage.Top = 0;
 			}
+
 			Refresh();
 		}
 
-		private void DoLoadNextPhoto()
-		{
-			Logger.Debug("DoLoadNextPhoto - Enter");
+        private void DoLoadNextPhoto()
+        {
+            Logger.Debug("DoLoadNextPhoto - Enter");
 
-			try
-			{
-				Photo p = ImageManager.NextPhoto;
-				string url = ImageManager.NextPhotoUrl;
-				ImageManager.PopPhoto();
+            Photo p = ImageManager.NextPhoto;
+            string url = ImageManager.NextPhotoUrl;
+            ImageManager.PopPhoto();
 
-				AddToQueue(p.PhotoId);
+            AddToQueue(p.PhotoId);
 
-				Image img = null;
+            Image img = null;
 
-				try
-				{
-					img = Image.FromStream(flickr.DownloadPicture(url));
-				}
-				catch(FlickrException ex)
-				{
-					this.Visible = false;
-					MessageBox.Show("The screensaver has exited as an error occurred (" + ex.Message + ")");
-					Application.Exit();
-					return;
-				}
+            try
+            {
+                img = Image.FromStream(flickr.DownloadPicture(url));
+            }
+            catch (FlickrException ex)
+            {
+                this.Visible = false;
+                MessageBox.Show("The screensaver has exited as an error occurred (" + ex.Message + ")");
+                Application.Exit();
+                return;
+            }
 
-				drawer.ChangeImage(img, p);
+            drawer.ChangeImage(img, p);
 
-				return;
-			}
-			finally
-			{
-				Logger.Debug("DoLoadNextPhoto - Finally");
-
-				if( random.Next(0, 2) == 0 ) MoveFlickrImage();
-
-				this.Invoke(new MethodInvoker(TimerLoadNextPhoto.Start));
-				//TimerLoadNextPhoto.Start();
-
-				Logger.Debug("DoLoadNextPhoto - Timer Started");
-			}
-		}
+            return;
+        }
 
 		private void TimerReloadPhotos_Tick(object sender, System.EventArgs e)
 		{
@@ -425,10 +413,7 @@ namespace FlickrNetScreensaver
 
 			try
 			{
-				if( thread.IsAlive )
-				{
-					thread.Abort();
-				}
+                if (loadNextPhotoWorker.IsBusy) loadNextPhotoWorker.CancelAsync();
 			}
 			catch
 			{
@@ -460,6 +445,18 @@ namespace FlickrNetScreensaver
 			}
 		}
 		#endregion
+
+        private void loadNextPhotoWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            DoLoadNextPhoto();
+        }
+
+        private void loadNextPhotoWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (random.Next(0, 2) == 0) MoveFlickrImage();
+
+            TimerLoadNextPhoto.Start();
+        }
 
 	}
 }
