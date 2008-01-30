@@ -1,4 +1,5 @@
 using System;
+using FlickrNetScreensaver.Properties;
 
 namespace FlickrNetScreensaver
 {
@@ -9,13 +10,10 @@ namespace FlickrNetScreensaver
 	{
 		public static IPictureDrawer GetDrawer(FScreensaver pictureForm)
 		{
-			if( Settings.Contains("Drawer") )
-                return GetDrawer(pictureForm, Settings.Get("Drawer"));
-			else
-				return GetDrawer(pictureForm, null);
+            return GetDrawer(pictureForm, Settings.Default.Drawer);
 		}
 
-		public static IPictureDrawer GetDrawer(FScreensaver pictureForm, string name)
+		private static IPictureDrawer GetDrawer(FScreensaver pictureForm, string name)
 		{
 			IPictureDrawer drawer;
 

@@ -3,6 +3,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using FlickrNetScreensaver.Properties;
 
 namespace FlickrNetScreensaver.DrawOptions
 {
@@ -153,66 +154,19 @@ namespace FlickrNetScreensaver.DrawOptions
 
 		public override void LoadSettings()
 		{
-			if( Settings.Contains("Postcard.Color") )
-			{
-				try
-				{
-					string[] colors = Settings.Get("Postcard.Color").Split(',');
-					Color c = Color.FromArgb(int.Parse(colors[0]), int.Parse(colors[1]), int.Parse(colors[2]));
-					SetColor(c);
-				}
-				catch 
-				{
-					SetColor(Color.White);
-				}
-			}
-			else
-			{
-				SetColor(Color.White);
-			}
+    		SetColor(Settings.Default.PostcardColor);
 
-			if( Settings.Contains("Postcard.Angle") )
-			{
-				try
-				{
-					Angle.SelectedItem = Settings.Get("Postcard.Angle");
-				}
-				catch {}
-			}
-			else
-			{
-				Angle.SelectedItem = "10";
-			}
-
-			if( Settings.Contains("Postcard.RandomAngle") )
-			{
-				try
-				{
-					RandomAngle.Checked = bool.Parse(Settings.Get("Postcard.RandomAngle"));
-				}
-				catch {}
-			}
-		
-			if( Settings.Contains("Postcard.Alternate") )
-			{
-				try
-				{
-					AlternateLeftRight.Checked = bool.Parse(Settings.Get("Postcard.Alternate"));
-				}
-				catch {}
-			}
-			else
-			{
-				AlternateLeftRight.Checked = true;
-			}
+            Angle.SelectedItem = Settings.Default.PostcardAngle;
+            RandomAngle.Checked = Settings.Default.PostcardRandomAngle;
+            AlternateLeftRight.Checked = Settings.Default.PostcardAlternate;
 		}
 
 		public override void SaveSettings()
 		{
-			Settings.Set("Postcard.Color", theColor.R + "," + theColor.G + "," + theColor.B);
-			Settings.Set("Postcard.Angle", Angle.SelectedItem.ToString());
-			Settings.Set("Postcard.RandomAngle", RandomAngle.Checked.ToString());
-			Settings.Set("Postcard.Alternate", AlternateLeftRight.Checked.ToString());
+            Settings.Default.PostcardColor = theColor;
+            Settings.Default.PostcardAngle = Angle.SelectedItem.ToString();
+            Settings.Default.PostcardRandomAngle = RandomAngle.Checked;
+            Settings.Default.PostcardAlternate = AlternateLeftRight.Checked;
 		}
 
 		private void ColorPicker_Click(object sender, System.EventArgs e)
@@ -230,17 +184,20 @@ namespace FlickrNetScreensaver.DrawOptions
 		{
 			theColor = color;
 
-			Brush b = new SolidBrush(color);
-			Image img = new Bitmap(colorPicture.Width, colorPicture.Height);
-			Graphics g = Graphics.FromImage(img);
-			g.FillRectangle(b, 0, 0, img.Width, img.Height);
-			g.Dispose();
-			b.Dispose();
+            Image img = new Bitmap(colorPicture.Width, colorPicture.Height);
+            using (Brush b = new SolidBrush(color))
+            {
+                using (Graphics g = Graphics.FromImage(img))
+                {
+                    g.FillRectangle(b, 0, 0, img.Width, img.Height);
+                    g.Dispose();
+                }
+                b.Dispose();
+            }
 
 			if( colorPicture.Image != null )
 			{
 				colorPicture.Image.Dispose();
-				colorPicture.Image = null;
 			}
 
 			colorPicture.Image = img;

@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 
 using FlickrNet;
+using FlickrNetScreensaver.Properties;
 
 namespace FlickrNetScreensaver
 {
@@ -895,20 +896,16 @@ namespace FlickrNetScreensaver
 
 		private void FConfigure_Load(object sender, System.EventArgs e)
 		{
-			string showWhat = "User";
+            LoadAuth();
 
-			if( Settings.Get("ShowWhat") != null ) showWhat = Settings.Get("ShowWhat");
-
-			LoadAuth();
-
-			switch(showWhat)
+            switch (Settings.Default.ShowType)
 			{
 				case "Everyone":
-					TabControl.SelectedIndex = 2;
+					//TabControl.SelectedIndex = 2;
 					LoadEveryone();
 					break;
 				case "Group":
-					TabControl.SelectedIndex = 1;
+					//TabControl.SelectedIndex = 1;
 					LoadGroup();
 					break;
 				case "User":
@@ -919,38 +916,17 @@ namespace FlickrNetScreensaver
 
 			LoadProxy();
 
-			if( Settings.Contains("DelayTime") )
-			{
-				try
-				{
-					DelayTime.Value = decimal.Parse(Settings.Get("DelayTime"));
-				}
-				catch(FormatException) {}
-			}
+            DelayTime.Value = Settings.Default.DrawerDelayTime;
+            FillScreen.Checked = Settings.Default.DrawerFillScreen;
 
-			if( Settings.Contains("FillScreen") )
-			{
-				FillScreen.Checked = bool.Parse(Settings.Get("FillScreen"));
-			}
-
-			if( Settings.Contains("ImageSize") )
-			{
-				string size = Settings.Get("ImageSize");
-				int i = ImageSize.FindStringExact(size);
-				if( i >= 0 ) ImageSize.SelectedIndex = i;
-			}
-			else
-			{
-				ImageSize.SelectedIndex = 1;
-			}
+			string size = Settings.Default.DrawerImageSize;
+			int i = ImageSize.FindStringExact(size);
+			if( i >= 0 ) ImageSize.SelectedIndex = i;
 
 			Drawer.Items.AddRange(DrawerFactory.GetNames());
 			Drawer.SelectedIndex = 0;
 
-			if( Settings.Contains("Drawer") )
-			{
-				Drawer.SelectedItem = Settings.Get("Drawer");
-			}
+            Drawer.SelectedItem = Settings.Default.Drawer;
 
 			DrawOptions.AbstractOptions options = DrawerFactory.GetOptionsControl(Drawer.SelectedItem.ToString());
 			panel1.Controls.Clear();
@@ -961,27 +937,23 @@ namespace FlickrNetScreensaver
 
 		private void LoadProxy()
 		{
-			bool bUseProxy = false;
-			if( Settings.Contains("UseProxy") )
-			{
-				bUseProxy = bool.Parse(Settings.Get("UseProxy"));
-			}
+			bool bUseProxy = Settings.Default.ProxyUse;
 
 			ProxyDefined.Checked = bUseProxy;
 			ProxyPanel.Enabled = bUseProxy;
 
 			if( !bUseProxy ) return;
 
-			ProxyIPAddress.Text = Settings.Get("ProxyIPAddress");
-			ProxyPort.Text = Settings.Get("ProxyPort");
-			ProxyUsername.Text = Settings.Get("ProxyUsername");
-			ProxyPassword.Text = Settings.Get("ProxyPassword");
-			ProxyDomain.Text = Settings.Get("ProxyDomain");
+            ProxyIPAddress.Text = Settings.Default.ProxyIPAddress;
+            ProxyPort.Text = Settings.Default.ProxyPort;
+            ProxyUsername.Text = Settings.Default.ProxyUsername;
+            ProxyPassword.Text = Settings.Default.ProxyPassword;
+			ProxyDomain.Text = Settings.Default.ProxyDomain;
 		}
 
 		private void LoadAuth()
 		{
-			Token = Settings.Get("AuthToken");
+            Token = Settings.Default.AuthenticationToken;
 			if( Token != null && Token.Length > 0 )
 			{
 				AuthTokenLabel.Visible = true;
@@ -996,19 +968,20 @@ namespace FlickrNetScreensaver
 
 		private void LoadUser()
 		{
-			TabControl.SelectedIndex = 0;
-			if( Settings.Contains("UserName") ) UserName.Text = Settings.Get("UserName");
-			
-			string type = Settings.Get("UserType");
-			switch(type)
+			//TabControl.SelectedIndex = 0;
+            SelectUser.Checked = true;
+
+            UserName.Text = Settings.Default.ShowUserUsername;
+
+            switch (Settings.Default.ShowUserType)
 			{
 				case "Set":
 					UserSet.Checked = true;
-					UserSetName.Text = Settings.Get("UserSet");
+					UserSetName.Text = Settings.Default.ShowUserSet;
 					break;
 				case "Tag":
 					UserTag.Checked = true;
-					UserTagName.Text = Settings.Get("UserTag");
+					UserTagName.Text = Settings.Default.ShowUserTag;
 					break;
 				case "Fav":
 					UserFav.Checked = true;
@@ -1025,20 +998,21 @@ namespace FlickrNetScreensaver
 
 		private void LoadGroup()
 		{
-			TabControl.SelectedIndex = 1;
-			GroupName.Text = Settings.Get("GroupName");
+            SelectGroup.Checked = true;
+			//TabControl.SelectedIndex = 1;
+			GroupName.Text = Settings.Default.ShowGroupName;
 		}
 
 		private void LoadEveryone()
 		{
-			TabControl.SelectedIndex = 2;
-			
-			string type = Settings.Get("EveryoneType");
-			switch(type)
+			//TabControl.SelectedIndex = 2;
+            SelectEveryone.Checked = true;
+
+            switch (Settings.Default.ShowEveryoneType)
 			{
 				case "Tag":
 					EveryoneTag.Checked = true;
-					EveryoneTagText.Text = Settings.Get("EveryoneTag");
+                    EveryoneTagText.Text = Settings.Default.ShowEveryoneTag;
 					break;
 				case "Recent":
 				default:
@@ -1050,7 +1024,8 @@ namespace FlickrNetScreensaver
 		private void BtnOK_Click(object sender, System.EventArgs e)
 		{
 			if( !CheckProxy() ) return;
-			Settings.SaveSettings();
+
+            Settings.Default.Save();
 
 			if( !CheckAuth() ) return;
 
@@ -1080,15 +1055,15 @@ namespace FlickrNetScreensaver
 				if( res == DialogResult.No ) return;
 			}
 
-			Settings.Set("DelayTime", DelayTime.Value.ToString("0.00"));
-			Settings.Set("ImageSize", ImageSize.SelectedItem.ToString());
-			Settings.Set("FillScreen", FillScreen.Checked.ToString());
+            Settings.Default.DrawerDelayTime = DelayTime.Value;
+			Settings.Default.DrawerImageSize = ImageSize.SelectedItem.ToString();
+            Settings.Default.DrawerFillScreen = FillScreen.Checked;
 
-			Settings.Set("Drawer", Drawer.SelectedItem.ToString());
+			Settings.Default.Drawer = Drawer.SelectedItem.ToString();
 			DrawOptions.AbstractOptions options = (DrawOptions.AbstractOptions)panel1.Controls[0];
 			options.SaveSettings();
 
-			Settings.SaveSettings();
+            Settings.Default.Save();
 
 			Flickr flickr = FlickrFactory.GetInstance();
 
@@ -1099,7 +1074,7 @@ namespace FlickrNetScreensaver
 		{
 			if( !ProxyDefined.Checked)
 			{
-				Settings.Set("UseProxy", "False");
+                Settings.Default.ProxyUse = false;
 				return true;
 			}
 
@@ -1127,12 +1102,12 @@ namespace FlickrNetScreensaver
 				return false;
 			}
 
-			Settings.Set("UseProxy", "True");
-			Settings.Set("ProxyIPAddress", ProxyIPAddress.Text);
-			Settings.Set("ProxyPort", ProxyPort.Text);
-			Settings.Set("ProxyUsername", ProxyUsername.Text);
-			Settings.Set("ProxyPassword", ProxyPassword.Text);
-			Settings.Set("ProxyDomain", ProxyDomain.Text);
+            Settings.Default.ProxyUse = true; ;
+			Settings.Default.ProxyIPAddress = ProxyIPAddress.Text;
+			Settings.Default.ProxyPort = ProxyPort.Text;
+			Settings.Default.ProxyUsername = ProxyUsername.Text;
+			Settings.Default.ProxyPassword = ProxyPassword.Text;
+			Settings.Default.ProxyDomain = ProxyDomain.Text;
 
 			return true;
 		}
@@ -1142,8 +1117,8 @@ namespace FlickrNetScreensaver
 		{
 			if( Token == null || Token.Length == 0 ) 
 			{
-				Settings.Remove("AuthToken");
-				Settings.SaveSettings();
+				Settings.Default.AuthenticationToken = null;
+                Settings.Default.Save();
 				return true;
 			}
 
@@ -1151,8 +1126,8 @@ namespace FlickrNetScreensaver
 			try
 			{
 				Auth auth = flickr.AuthCheckToken(Token);
-				Settings.Set("AuthToken", Token);
-				Settings.SaveSettings();
+				Settings.Default.AuthenticationToken = Token;
+                Settings.Default.Save();
 				return true;
 			}
 			catch(FlickrException)
@@ -1190,9 +1165,9 @@ namespace FlickrNetScreensaver
 
 			if( UserAll.Checked )
 			{
-				Settings.Add("ShowWhat", "User");
-				Settings.Add("UserName", UserName.Text);
-				Settings.Add("UserType", "All");
+                Settings.Default.ShowType = "User";
+                Settings.Default.ShowUserUsername = UserName.Text;
+                Settings.Default.ShowUserType = "All";
 				return true;
 			}
 
@@ -1212,8 +1187,8 @@ namespace FlickrNetScreensaver
 					if( pset.Title == UserSetName.Text )
 					{
 						bFound = true;
-						Settings.Add("UserSet", UserSetName.Text);
-						Settings.Add("UserSetId", pset.PhotosetId.ToString());
+                        Settings.Default.ShowUserSet = UserSetName.Text;
+                        Settings.Default.ShowUserSetId = pset.PhotosetId.ToString();
 						break;
 					}
 				}
@@ -1223,9 +1198,9 @@ namespace FlickrNetScreensaver
 					return false;
 				}
 
-				Settings.Add("ShowWhat", "User");
-				Settings.Add("UserName", UserName.Text);
-				Settings.Add("UserType", "Set");
+                Settings.Default.ShowType = "User";
+                Settings.Default.ShowUserUsername = UserName.Text;
+                Settings.Default.ShowUserType = "Set";
 
 				return true;
 			}
@@ -1245,10 +1220,10 @@ namespace FlickrNetScreensaver
 					return false;
 				}
 
-				Settings.Add("ShowWhat", "User");
-				Settings.Add("UserName", UserName.Text);
-				Settings.Add("UserType", "Tag");
-				Settings.Add("UserTag", UserTagName.Text);
+                Settings.Default.ShowType = "User";
+                Settings.Default.ShowUserUsername = UserName.Text;
+                Settings.Default.ShowUserType = "Tag";
+                Settings.Default.ShowUserTag = UserTagName.Text;
 
 				return true;
 			}
@@ -1262,9 +1237,9 @@ namespace FlickrNetScreensaver
 					return false;
 				}
 
-				Settings.Add("ShowWhat", "User");
-				Settings.Add("UserName", UserName.Text);
-				Settings.Add("UserType", "Fav");
+                Settings.Default.ShowType = "User";
+                Settings.Default.ShowUserUsername = UserName.Text;
+                Settings.Default.ShowUserType = "Fav";
 
 				return true;
 			}
@@ -1274,22 +1249,23 @@ namespace FlickrNetScreensaver
 				Photos photos = null;
 				if( flickr.IsAuthenticated )
 				{
-					Auth auth = flickr.AuthCheckToken("");
+					Auth auth = flickr.AuthCheckToken(flickr.AuthToken);
 					if( auth.User.UserId == u.UserId )
 					{
 						// show own contacts
-						Settings.Add("UserContacts", "Own");
+
+                        Settings.Default.ShowUserContact = "Own";
 						photos = flickr.PhotosGetContactsPhotos(10, false, false, false);
 					}
 					else
-					{
-						Settings.Add("UserContacts", "Others");
+                    {
+                        Settings.Default.ShowUserContact = "Others";
 						photos = flickr.PhotosGetContactsPublicPhotos(u.UserId, 10, false, false, false);
 					}
 				}
 				else
 				{
-					Settings.Add("UserContacts", "Others");
+                    Settings.Default.ShowUserContact = "Others";
 					photos = flickr.PhotosGetContactsPublicPhotos(u.UserId, 10, false, false, false);
 				}
 
@@ -1299,9 +1275,9 @@ namespace FlickrNetScreensaver
 					return false;
 				}
 
-				Settings.Add("ShowWhat", "User");
-				Settings.Add("UserName", UserName.Text);
-				Settings.Add("UserType", "Contacts");
+                Settings.Default.ShowType = "User";
+                Settings.Default.ShowUserUsername = UserName.Text;
+                Settings.Default.ShowUserType = "Contacts";
 
 				return true;
 			}
@@ -1320,8 +1296,8 @@ namespace FlickrNetScreensaver
 
 				if( groupId != null )
 				{
-					Settings.Add("ShowWhat", "Group");
-					Settings.Add("GroupName", GroupName.Text);
+                    Settings.Default.ShowType = "Group";
+                    Settings.Default.ShowGroupName = GroupName.Text;
 
 					return true;
 				}
@@ -1344,8 +1320,8 @@ namespace FlickrNetScreensaver
 			
 			if( EveryoneRecent.Checked )
 			{
-				Settings.Add("ShowWhat", "Everyone");
-				Settings.Add("EveryoneType", "Recent");
+                Settings.Default.ShowType = "Everyone";
+                Settings.Default.ShowEveryoneType = "Recent";
 
 				return true;
 			}
@@ -1359,9 +1335,9 @@ namespace FlickrNetScreensaver
 					return false;
 				}
 
-				Settings.Add("ShowWhat", "Everyone");
-				Settings.Add("EveryoneType", "Tag");
-				Settings.Add("EveryoneTag", EveryoneTagText.Text);
+                Settings.Default.ShowType = "Everyone";
+                Settings.Default.ShowEveryoneType = "Tag";
+                Settings.Default.ShowEveryoneTag = EveryoneTagText.Text;
 
 				return true;
 			}
@@ -1445,8 +1421,8 @@ namespace FlickrNetScreensaver
 		{
 			RecentPhotosImages.Images.Clear();
 			RecentPhotosList.Items.Clear();
-			string photoIds = Settings.Get("RecentPhotos");
-			if( photoIds == null || photoIds.Length == 0 ) 
+            string photoIds = Settings.Default.RecentPhotos;
+			if( String.IsNullOrEmpty(photoIds) ) 
 			{
 				RecentPhotosLabel.Text = "No recent photos to display.";
 				RecentPhotosLabel.Visible = true;

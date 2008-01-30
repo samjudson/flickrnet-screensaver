@@ -3,6 +3,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using FlickrNetScreensaver.Properties;
 
 namespace FlickrNetScreensaver.DrawOptions
 {
@@ -64,19 +65,12 @@ namespace FlickrNetScreensaver.DrawOptions
 
 		public override void LoadSettings()
 		{
-			if( Settings.Contains("Plain.ShowText") )
-			{
-				try
-				{
-					ShowText.Checked = bool.Parse(Settings.Get("Plain.ShowText"));
-				}
-				catch(FormatException) {}
-			}
+            ShowText.Checked = Settings.Default.PlainShowText;
 		}
 
 		public override void SaveSettings()
 		{
-			Settings.Set("Plain.ShowText", ShowText.Checked.ToString());
+            Settings.Default.PlainShowText = ShowText.Checked;
 		}
 
 

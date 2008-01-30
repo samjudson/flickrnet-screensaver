@@ -8,6 +8,7 @@ using System.Threading;
 
 using FlickrNet;
 using log4net;
+using FlickrNetScreensaver.Properties;
 
 namespace FlickrNetScreensaver
 {
@@ -34,7 +35,6 @@ namespace FlickrNetScreensaver
 		private Flickr flickr = FlickrFactory.GetInstance();
 
 		private bool fillScreen = false;
-		private bool showText = false;
 		private Random random = new Random();
 		private int ScreenNumber = 0;
 		private System.Windows.Forms.Timer TimerReloadPhotos;
@@ -165,12 +165,9 @@ namespace FlickrNetScreensaver
 
 		private void LoadSettings()
 		{
-			string showWhat = "User";
-			if( Settings.Contains("ShowWhat") ) showWhat = (string)Settings.Get("ShowWhat");
-
 			try
 			{
-				switch(showWhat)
+                switch (Settings.Default.ShowType)
 				{
 					case "Everyone":
 						LoadEveryone();
@@ -196,95 +193,69 @@ namespace FlickrNetScreensaver
 				return;
 			}
 
-			if( Settings.Contains("DelayTime") )
-			{
-				try
-				{
-					 // Fractions of a minutes
-					TimerLoadNextPhoto.Interval = (int)Math.Round(1000 * 60 * decimal.Parse((string)Settings.Get("DelayTime")), 0);
-				}
-				catch(FormatException) {}
-			}
+			 // Fractions of a minutes
+			TimerLoadNextPhoto.Interval = (int)Math.Round(1000 * 60 * Settings.Default.DrawerDelayTime, 0);
 
-			if( Settings.Contains("FillScreen") )
-			{
-				try
-				{
-					fillScreen = bool.Parse((string)Settings.Get("FillScreen")); 
-				}
-				catch(FormatException) {}
-			}
-
-			if( Settings.Contains("ShowText") )
-			{
-				try
-				{
-					showText = bool.Parse(Settings.Get("ShowText"));
-				}
-				catch(FormatException)
-				{}
-			}
+            fillScreen = Settings.Default.DrawerFillScreen;
 		}
 
 		private void LoadUser()
 		{
-			string userName = "Sam Judson";
-			string userType = "Tag";
+            string userName = Settings.Default.ShowUserUsername;
+			string userType = Settings.Default.ShowType;
 			FoundUser u = null;
-
-			if( Settings.Contains("UserName") ) userName = (string)Settings.Get("UserName");
-			if( Settings.Contains("UserType") ) userType = (string)Settings.Get("UserType");
+            Photo[] photos = null;
 
 			switch(userType)
 			{
 				case "Set":
-					ImageManager.Initialise(flickr.PhotosetsGetPhotos((string)Settings.Get("UserSetId")));
+                    photos = flickr.PhotosetsGetPhotos(Settings.Default.ShowUserSetId);
 					break;
 				case "Tag":
 					u = flickr.PeopleFindByUsername(userName);
-					string tags = Settings.Contains("UserTag")?(string)Settings.Get("UserTag"):"flickrscreensaver";
-					ImageManager.Initialise(flickr.PhotosSearch(u.UserId, tags, TagMode.AllTags, "", PhotoSearchExtras.OwnerName).PhotoCollection);
+                    string tags = Settings.Default.ShowUserTag;
+                    photos = flickr.PhotosSearch(u.UserId, tags, TagMode.AllTags, "", PhotoSearchExtras.OwnerName).PhotoCollection;
 					break;
 				case "Fav":
 					u = flickr.PeopleFindByUsername(userName);
-					ImageManager.Initialise(flickr.FavoritesGetPublicList(u.UserId, 200, 1).PhotoCollection);
+                    photos = flickr.FavoritesGetPublicList(u.UserId, 200, 1).PhotoCollection;
 					break;
 				case "Contacts":
-					string whichContacts = Settings.Get("UserContacts");
-					if( whichContacts == "Own" )
-						ImageManager.Initialise(flickr.PhotosGetContactsPhotos(200, false, false, false).PhotoCollection);
-					else
-					{
-						u = flickr.PeopleFindByUsername(userName);
-						ImageManager.Initialise(flickr.PhotosGetContactsPublicPhotos(u.UserId, 200, false, false, false).PhotoCollection);
-					}
+                    if (Settings.Default.ShowUserContact == "Own")
+                    {
+                        photos = flickr.PhotosGetContactsPhotos(200, false, false, false).PhotoCollection;
+                    }
+                    else
+                    {
+                        u = flickr.PeopleFindByUsername(userName);
+                        photos = flickr.PhotosGetContactsPublicPhotos(u.UserId, 200, false, false, false).PhotoCollection;
+                    }
 					break;
 				case "All":
 				default:
 					u = flickr.PeopleFindByUsername(userName);
-					ImageManager.Initialise(flickr.PhotosSearch(u.UserId, "", TagMode.AllTags, "", 200, 1).PhotoCollection);
+					photos = flickr.PhotosSearch(u.UserId, "", TagMode.AllTags, "", 200, 1).PhotoCollection;
 					break;
 			}
-		}
+            ImageManager.Initialise(photos);
+        }
 
 		private void LoadGroup()
 		{
-			string groupid = flickr.UrlsLookupGroup("http://www.flickr.com/groups/" + Settings.Get("GroupName"));
+			string groupid = flickr.UrlsLookupGroup("http://www.flickr.com/groups/" + Settings.Default.ShowGroupName);
 			ImageManager.Initialise(flickr.GroupPoolGetPhotos(groupid, 200, 1).PhotoCollection);
 		}
 
 		private void LoadEveryone()
 		{
-			string everyoneType = (string)Settings.Get("EveryoneType");
-
-			switch(everyoneType)
+			switch(Settings.Default.ShowEveryoneType)
 			{
 				case "Recent":
 					ImageManager.Initialise(flickr.PhotosGetRecent().PhotoCollection);
 					break;
 				case "Tag":
 				default:
-					ImageManager.Initialise(flickr.PhotosSearch((string)Settings.Get("EveryoneTag"), TagMode.AllTags, null).PhotoCollection);
+					ImageManager.Initialise(flickr.PhotosSearch(Settings.Default.ShowEveryoneTag, TagMode.AllTags, null).PhotoCollection);
 					break;
 			}
 		}
@@ -469,8 +440,8 @@ namespace FlickrNetScreensaver
 				photoIds += (string)previousPhotos.Dequeue() + "|";
 			}
 			if( photoIds.Length > 0 ) photoIds = photoIds.Substring(0, photoIds.Length-1);
-			Settings.Set("RecentPhotos", photoIds);
-			Settings.SaveSettings();
+            Settings.Default.RecentPhotos = photoIds;
+            Settings.Default.Save();
 		}
 
 		#region Private Logger Class

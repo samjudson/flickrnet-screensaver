@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using FlickrNetScreensaver.Properties;
 
 namespace FlickrNetScreensaver.Drawers
 {
@@ -21,12 +22,7 @@ namespace FlickrNetScreensaver.Drawers
 				finalGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
 				finalGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-				bool fillScreen = false;
-				if( Settings.Contains("FillScreen") )
-				{
-					try	{ fillScreen = bool.Parse(Settings.Get("FillScreen")); }
-					catch(FormatException) {}
-				}
+				bool fillScreen = Settings.Default.DrawerFillScreen;
 
 				double scale = 1.0;
 

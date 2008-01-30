@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using FlickrNet;
+using FlickrNetScreensaver.Properties;
 
 namespace FlickrNetScreensaver.Drawers
 {
@@ -15,16 +16,10 @@ namespace FlickrNetScreensaver.Drawers
 
 		private string _text;
 		private bool _showText;
-		public PlainDrawer()
+
+        public PlainDrawer()
 		{
-			if( Settings.Contains("Plain.ShowText") )
-			{
-				_showText = bool.Parse(Settings.Get("Plain.ShowText"));
-			}
-			else
-			{
-				_showText = false;
-			}
+            _showText = Settings.Default.PlainShowText;
 		}
 
 		public void SetText(string description, string username)

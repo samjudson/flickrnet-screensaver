@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Specialized;
 
 using FlickrNet;
+using FlickrNetScreensaver.Properties;
 
 namespace FlickrNetScreensaver
 {
@@ -27,14 +28,7 @@ namespace FlickrNetScreensaver
 
 		static ImageManager()
 		{
-			if( Settings.Contains("ImageSize") )
-			{
-				sizeRequired = (string)Settings.Get("ImageSize");
-			}
-			else
-			{
-				sizeRequired = "Medium";
-			}
+            sizeRequired = Settings.Default.DrawerImageSize;
 		}
 
 		private ImageManager()

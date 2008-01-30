@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using FlickrNetScreensaver.Properties;
 
 namespace FlickrNetScreensaver.Drawers
 {
@@ -12,7 +13,6 @@ namespace FlickrNetScreensaver.Drawers
 		private FScreensaver _pictureForm;
 		private PictureBox _pictureBox;
 
-		private string color;
 		private Color realColor;
 		private int angle;
 		private bool randomAngle;
@@ -20,35 +20,10 @@ namespace FlickrNetScreensaver.Drawers
 
 		public PostcardDrawer()
 		{
-			color = Settings.Get("Postcard.Color");
-			if( color == null || color.Length == 0 )
-			{
-				realColor = Color.WhiteSmoke;
-			}
-			else
-			{
-				string[] rgb = color.Split(',');
-				realColor = Color.FromArgb(int.Parse(rgb[0]),int.Parse(rgb[1]),int.Parse(rgb[2]));
-			}
-
-			if( Settings.Contains("Postcard.Angle") )
-			{
-				angle = int.Parse(Settings.Get("Postcard.Angle"));
-			}
-			else
-			{
-				angle = 10;
-			}
-
-			if( Settings.Contains("Postcard.Alternate") )
-			{
-				alternateAngle = bool.Parse(Settings.Get("Postcard.Alternate"));
-			}
-
-			if( Settings.Contains("Postcard.RandomAngle") )
-			{
-				randomAngle = bool.Parse(Settings.Get("Postcard.RandomAngle"));
-			}
+            realColor = Settings.Default.PostcardColor;
+            if (!int.TryParse(Settings.Default.PostcardAngle, out angle)) angle = 10;
+            alternateAngle = Settings.Default.PostcardAlternate;
+            randomAngle = Settings.Default.PostcardRandomAngle;
 		}
 
 		public void Initialise(FScreensaver pictureForm)

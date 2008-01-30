@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using FlickrNet;
+using FlickrNetScreensaver.Properties;
 
 namespace FlickrNetScreensaver
 {
@@ -17,8 +18,8 @@ namespace FlickrNetScreensaver
 
 		public static Flickr GetInstance()
 		{
-			if( Settings.Contains("AuthToken") )
-				return GetInstance(Settings.Get("AuthToken"));
+			if( !String.IsNullOrEmpty(Settings.Default.AuthenticationToken) )
+				return GetInstance(Settings.Default.AuthenticationToken);
 			else
 				return GetInstance(null);
 		}
@@ -35,25 +36,21 @@ namespace FlickrNetScreensaver
 
 		public static WebProxy GetProxy()
 		{
-			bool useProxy = false;
-			if( Settings.Contains("UseProxy") )
-			{
-				useProxy = bool.Parse(Settings.Get("UseProxy"));
-			}
+			bool useProxy = Settings.Default.ProxyUse;
 
-			if( !useProxy )
+            if( !useProxy )
 			{
 				return WebProxy.GetDefaultProxy();
 			}
 
 			WebProxy proxy = new WebProxy();
-			proxy.Address = new Uri("http://" + Settings.Get("ProxyIPAddress") + ":" + Settings.Get("ProxyPort"));
-			if( Settings.Contains("ProxyUsername") && Settings.Get("ProxyUsername").Length > 0 )
+			proxy.Address = new Uri("http://" + Settings.Default.ProxyIPAddress + ":" + Settings.Default.ProxyPort);
+			if( !String.IsNullOrEmpty(Settings.Default.ProxyUsername) )
 			{
 				NetworkCredential creds = new NetworkCredential();
-				creds.UserName = Settings.Get("ProxyUsername");
-				creds.Password = Settings.Get("ProxyPassword");
-				creds.Domain = Settings.Get("ProxyDomain");
+				creds.UserName = Settings.Default.ProxyUsername;
+				creds.Password = Settings.Default.ProxyPassword;
+				creds.Domain = Settings.Default.ProxyDomain;
 				proxy.Credentials = creds;
 			}
 
