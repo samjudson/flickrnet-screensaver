@@ -131,6 +131,7 @@ namespace FlickrNetScreensaver
             this.label3 = new System.Windows.Forms.Label();
             this.GroupName = new System.Windows.Forms.TextBox();
             this.EveryoneWhat = new System.Windows.Forms.GroupBox();
+            this.EveryoneTagInteresting = new System.Windows.Forms.CheckBox();
             this.EveryoneTagText = new System.Windows.Forms.TextBox();
             this.EveryoneTag = new System.Windows.Forms.RadioButton();
             this.EveryoneRecent = new System.Windows.Forms.RadioButton();
@@ -188,7 +189,6 @@ namespace FlickrNetScreensaver
             this.ProxyDefined = new System.Windows.Forms.CheckBox();
             this.AboutButton = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.EveryoneTagInteresting = new System.Windows.Forms.CheckBox();
             this.TabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.GroupWhat.SuspendLayout();
@@ -314,6 +314,16 @@ namespace FlickrNetScreensaver
             this.EveryoneWhat.Size = new System.Drawing.Size(360, 80);
             this.EveryoneWhat.TabIndex = 10;
             this.EveryoneWhat.TabStop = false;
+            // 
+            // EveryoneTagInteresting
+            // 
+            this.EveryoneTagInteresting.AutoSize = true;
+            this.EveryoneTagInteresting.Location = new System.Drawing.Point(220, 42);
+            this.EveryoneTagInteresting.Name = "EveryoneTagInteresting";
+            this.EveryoneTagInteresting.Size = new System.Drawing.Size(130, 17);
+            this.EveryoneTagInteresting.TabIndex = 3;
+            this.EveryoneTagInteresting.Text = "Sortby Interestingness";
+            this.EveryoneTagInteresting.UseVisualStyleBackColor = true;
             // 
             // EveryoneTagText
             // 
@@ -870,19 +880,11 @@ namespace FlickrNetScreensaver
             this.AboutButton.Text = "About";
             this.AboutButton.Click += new System.EventHandler(this.AboutButton_Click);
             // 
-            // EveryoneTagInteresting
-            // 
-            this.EveryoneTagInteresting.AutoSize = true;
-            this.EveryoneTagInteresting.Location = new System.Drawing.Point(220, 42);
-            this.EveryoneTagInteresting.Name = "EveryoneTagInteresting";
-            this.EveryoneTagInteresting.Size = new System.Drawing.Size(130, 17);
-            this.EveryoneTagInteresting.TabIndex = 3;
-            this.EveryoneTagInteresting.Text = "Sortby Interestingness";
-            this.EveryoneTagInteresting.UseVisualStyleBackColor = true;
-            // 
             // FConfigure
             // 
+            this.AcceptButton = this.BtnOK;
             this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+            this.CancelButton = this.BtnCancel;
             this.ClientSize = new System.Drawing.Size(402, 464);
             this.Controls.Add(this.AboutButton);
             this.Controls.Add(this.TabControl);

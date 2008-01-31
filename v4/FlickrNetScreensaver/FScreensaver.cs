@@ -213,7 +213,7 @@ namespace FlickrNetScreensaver
 		private void LoadUser()
 		{
             string userName = Settings.Default.ShowUserUsername;
-			string userType = Settings.Default.ShowType;
+			string userType = Settings.Default.ShowUserType;
 			FoundUser u = null;
             Photo[] photos = null;
 
