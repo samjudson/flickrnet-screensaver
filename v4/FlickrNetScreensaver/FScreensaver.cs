@@ -220,7 +220,7 @@ namespace FlickrNetScreensaver
 			switch(userType)
 			{
 				case "Set":
-                    photos = flickr.PhotosetsGetPhotos(Settings.Default.ShowUserSetId);
+                    photos = flickr.PhotosetsGetPhotos(Settings.Default.ShowUserSetId).PhotoCollection;
 					break;
 				case "Tag":
 					u = flickr.PeopleFindByUsername(userName);
@@ -259,16 +259,32 @@ namespace FlickrNetScreensaver
 
 		private void LoadEveryone()
 		{
-			switch(Settings.Default.ShowEveryoneType)
-			{
-				case "Recent":
-					ImageManager.Initialise(flickr.PhotosGetRecent().PhotoCollection);
-					break;
-				case "Tag":
-				default:
-					ImageManager.Initialise(flickr.PhotosSearch(Settings.Default.ShowEveryoneTag, TagMode.AllTags, null).PhotoCollection);
-					break;
-			}
+            if (Settings.Default.ShowEveryoneType == "Recent")
+            {
+                ImageManager.Initialise(flickr.PhotosGetRecent().PhotoCollection);
+            }
+            else
+            {
+                if (Settings.Default.ShowEveryoneTagInteresting == true)
+                {
+                    PhotoCollection photos = new PhotoCollection();
+                    PhotoSearchOptions o = new PhotoSearchOptions();
+                    o.Tags = Settings.Default.ShowEveryoneTag;
+                    o.TagMode = TagMode.AllTags;
+                    o.SortOrder = PhotoSearchSortOrder.InterestingnessDesc;
+                    for (int i = 0; i < 10; i++)
+                    {
+                        o.MinUploadDate = DateTime.Today.AddDays(-i);
+                        o.MaxUploadDate = DateTime.Today.AddDays(-i).AddHours(23).AddHours(59);
+                        photos.AddRange(flickr.PhotosSearch(o).PhotoCollection);
+                    }
+                    ImageManager.Initialise(photos);
+                }
+                else
+                {
+                    ImageManager.Initialise(flickr.PhotosSearch(Settings.Default.ShowEveryoneTag, TagMode.AllTags, null).PhotoCollection);
+                }
+            }
 		}
 
 		private bool _suspendMouseMove;
