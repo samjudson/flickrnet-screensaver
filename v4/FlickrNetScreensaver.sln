@@ -1,13 +1,13 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlickrNetScreensaver", "FlickrNetScreensaver\FlickrNetScreensaver.csproj", "{7A7043EE-A585-4290-AC53-057D1160E8DE}"
-EndProject
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EEE9981C-0F11-43B0-B934-639B9CC97F8D}"
 	ProjectSection(SolutionItems) = preProject
 		FlickrNet.dll = FlickrNet.dll
 		log4net.dll = log4net.dll
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlickrNetScreensaver", "FlickrNetScreensaver\FlickrNetScreensaver.csproj", "{7A7043EE-A585-4290-AC53-057D1160E8DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

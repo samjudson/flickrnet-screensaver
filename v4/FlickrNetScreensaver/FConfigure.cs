@@ -1289,7 +1289,14 @@ namespace FlickrNetScreensaver
 
 				if( photos.PhotoCollection.Length == 0 )
 				{
-					MessageBox.Show("This user does not have any contacts with photos");
+                    if (flickr.IsAuthenticated)
+                    {
+                        MessageBox.Show("This user does not have any contacts with photos.");
+                    }
+                    else
+                    {
+                        MessageBox.Show("This user does not have any contacts with photos. Consider authenticating to view private photos.");
+                    }
 					return false;
 				}
 

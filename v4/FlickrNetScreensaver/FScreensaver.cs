@@ -232,14 +232,19 @@ namespace FlickrNetScreensaver
                     photos = flickr.FavoritesGetPublicList(u.UserId, 200, 1).PhotoCollection;
 					break;
 				case "Contacts":
+                    u = flickr.PeopleFindByUsername(userName);
                     if (Settings.Default.ShowUserContact == "Own")
                     {
-                        photos = flickr.PhotosGetContactsPhotos(200, false, false, false).PhotoCollection;
+                        PhotoSearchOptions o = new PhotoSearchOptions();
+                        o.UserId = u.UserId;
+                        o.Contacts = ContactSearch.AllContacts;
+                        o.ContentType = ContentTypeSearch.PhotosOnly;
+                        o.PerPage = 200;
+                        photos = flickr.PhotosSearch(o).PhotoCollection;
                     }
                     else
                     {
-                        u = flickr.PeopleFindByUsername(userName);
-                        photos = flickr.PhotosGetContactsPublicPhotos(u.UserId, 200, false, false, false).PhotoCollection;
+                        photos = flickr.PhotosGetContactsPublicPhotos(u.UserId).PhotoCollection;
                     }
 					break;
 				case "All":
