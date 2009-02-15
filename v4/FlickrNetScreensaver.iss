@@ -29,7 +29,6 @@ Source: FlickrNetScreensaver\bin\Release\log4net.dll; DestDir: {sys}
 Filename: {sys}\rundll32.exe; Parameters: desk.cpl,InstallScreenSaver {app}\Flickr.scr; WorkingDir: {sys}; Description: Install Screensaver Now.; Flags: runasoriginaluser
 
 [UninstallDelete]
-Name: {app}; Type: filesandordirs
 Name: {group}; Type: filesandordirs
 
 [_ISToolPreCompile]
