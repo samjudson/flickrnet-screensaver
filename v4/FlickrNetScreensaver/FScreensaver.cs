@@ -302,11 +302,12 @@ namespace FlickrNetScreensaver
 
 		public void FScreensaver_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
 		{
-#if DEBUG
-            return;
-#endif
-			int x = e.X;
-			int y = e.Y;
+            CheckMouseMovement(sender, e.X, e.Y);
+        }
+
+        [System.Diagnostics.Conditional("RELEASE")]
+        private void CheckMouseMovement(object sender, int x, int y)
+        {
 			if( sender != this )
 			{
 				Point p2 = ((Control)sender).PointToScreen(new Point(x, y));
@@ -314,19 +315,12 @@ namespace FlickrNetScreensaver
 				x = p.X;
 				y = p.Y;
 			}
-			//Logger.Debug("Mouse Move called by " + sender.ToString());
-			//Logger.Debug("Mouse Moved to " + x + " " + y);
-			//Logger.Debug("Suspend Mouse Move = " + SuspendMouseMove);
 
 			if (!SuspendMouseMove && !MouseXY.IsEmpty)
 			{
 				if (MouseXY != new Point(x, y))
 				{
-					Close();
-				}
-				if (e.Clicks > 0)
-				{
-					Close();
+                    Application.Exit();
 				}
 			}
 			MouseXY = new Point(x, y);

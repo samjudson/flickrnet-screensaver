@@ -88,7 +88,14 @@ namespace FlickrNetScreensaver
 					s = flickr.PhotosGetSizes(p.PhotoId);
 					sizeCache.Add(p.PhotoId, s);
 				}
-				url = s.SizeCollection[s.SizeCollection.Length - 2].Source;
+                if (s.SizeCollection[s.SizeCollection.Length - 2].Width > 1024 && s.SizeCollection[s.SizeCollection.Length - 2].Height > 1024)
+                {
+                    url = s.SizeCollection[s.SizeCollection.Length - 2].Source;
+                }
+                else
+                {
+                    url = s.SizeCollection[s.SizeCollection.Length - 1].Source;
+                }
 
 				foreach(FlickrNet.Size size in s.SizeCollection)
 				{
