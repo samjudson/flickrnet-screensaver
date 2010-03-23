@@ -35,7 +35,6 @@ namespace FlickrNetScreensaver
 						System.Windows.Forms.Application.Run(new FConfigure());
 						break;
 					case "/s":
-						PingWackyLabs();
 						System.Windows.Forms.Application.Run(new FScreensaver(0));
 						break;
 					case "/p":
@@ -60,7 +59,6 @@ namespace FlickrNetScreensaver
 				}
 #endif
 #if !DEBUG
-				PingWackyLabs();
 				System.Windows.Forms.Application.Run(new FScreensaver(0));
 #endif
 			}
@@ -70,24 +68,6 @@ namespace FlickrNetScreensaver
 		{
 			MessageBox.Show("The application has performed an exception. Please report to Sam Judson (sam@wackylabs.net)\r\n" + e.Exception.Message);
 			Application.Exit();
-		}
-
-		private static void PingWackyLabs()
-		{
-			System.Threading.Thread t = new System.Threading.Thread(new System.Threading.ThreadStart(DoPingWackyLabs));
-			t.Start();
-		}
-
-		private static void DoPingWackyLabs()
-		{
-			try
-			{
-				System.Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-
-				System.Net.HttpWebRequest req = (System.Net.HttpWebRequest)System.Net.HttpWebRequest.Create("http://www.wackylabs.net/mt/log.php?type=runlog&text=FlickrSS+" + version.ToString(4));
-				req.GetResponse();
-			}
-			catch {}
 		}
 
     }

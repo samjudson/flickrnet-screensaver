@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{7A7043EE-A585-4290-AC53-057D1160E8DE}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -73,6 +73,7 @@
     <Compile Include="Drawers\MovingDrawer.cs" />
     <Compile Include="Drawers\PlainDrawer.cs" />
     <Compile Include="Drawers\PostcardDrawer.cs" />
+    <Compile Include="Drawers\StackDrawer.cs" />
     <Compile Include="DrawOptions\AbstractOptions.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -83,6 +84,9 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="DrawOptions\PostcardOptions.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DrawOptions\StackOptions.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="FAbout.cs">
@@ -114,6 +118,9 @@
     <EmbeddedResource Include="DrawOptions\PostcardOptions.resx">
       <DependentUpon>PostcardOptions.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DrawOptions\StackOptions.resx">
+      <DependentUpon>StackOptions.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FAbout.resx">
       <DependentUpon>FAbout.cs</DependentUpon>

@@ -95,9 +95,6 @@ namespace FlickrNetScreensaver.Drawers
                     interG.Dispose();
                 }
 
-                //interBmp.Save(@"C:\inter.jpg");
-
-
                 // Create final bitmap full screen
                 finalBmp = new Bitmap((int)Math.Ceiling(nWidth), (int)Math.Ceiling(nHeight));
                 using (Graphics finalG = Graphics.FromImage(finalBmp))

@@ -55,19 +55,6 @@ namespace FlickrNetScreensaver.Drawers
 
 			if( _showText )
 			{
-				if( photo.OwnerName == null || photo.OwnerName.Length == 0 )
-				{
-					Flickr f = FlickrFactory.GetInstance();
-					if( photo.UserId == null || photo.UserId.Length == 0 ) 
-					{
-						photo.OwnerName = f.PhotosGetInfo(photo.PhotoId).Owner.UserName;
-					}
-					else
-					{
-						photo.OwnerName = f.PeopleGetInfo(photo.UserId).UserName;
-					}
-					SetText(photo.Title, photo.OwnerName);
-				}
 				SetText(photo.Title, photo.OwnerName);
 			}
 			

@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 
 using FlickrNet;
 using FlickrNetScreensaver.Properties;
+using System.Collections.Generic;
 
 namespace FlickrNetScreensaver
 {
@@ -13,14 +14,13 @@ namespace FlickrNetScreensaver
 	public sealed class ImageManager
 	{
 		// Store the photo in this collection
-		private static readonly PhotoCollection initialCollection = new PhotoCollection();
+        private static readonly List<Photo> initialCollection = new List<Photo>();
 
 		// contains list of photos to download
-		private static readonly PhotoCollection photosToDownload = new PhotoCollection();
+        private static readonly List<Photo> photosToDownload = new List<Photo>();
 
 		// The flickr instance
 		private static readonly Flickr flickr = FlickrFactory.GetInstance();
-		private static readonly Hashtable sizeCache = new Hashtable();
 		private static string sizeRequired;
 
 		private static int nextIndex;
@@ -39,7 +39,7 @@ namespace FlickrNetScreensaver
 		/// Initialise the ImageManager with a collection of photos.
 		/// </summary>
 		/// <param name="photos"></param>
-		public static void Initialise(PhotoCollection photos)
+		public static void Initialise(List<Photo> photos)
 		{
 			initialCollection.AddRange(photos);
 			photosToDownload.AddRange(photos);
@@ -55,7 +55,7 @@ namespace FlickrNetScreensaver
 			}
 		}
 
-		public static string NextPhotoUrl
+		public static Uri NextPhotoUrl
 		{
 			get
 			{
@@ -73,41 +73,28 @@ namespace FlickrNetScreensaver
 			nextIndex = rand.Next(0, photosToDownload.Count);
 		}
 
-		private static string CalcUrl(Photo p)
+		private static Uri CalcUrl(Photo p)
 		{
-			string url = null;
-			try
-			{
-				FlickrNet.Sizes s = null;
-				if( sizeCache.ContainsKey(p.PhotoId) )
-				{
-					s = (Sizes)sizeCache[p.PhotoId];
-				}
-				else
-				{
-					s = flickr.PhotosGetSizes(p.PhotoId);
-					sizeCache.Add(p.PhotoId, s);
-				}
-                if (s.SizeCollection[s.SizeCollection.Length - 2].Width > 1024 && s.SizeCollection[s.SizeCollection.Length - 2].Height > 1024)
-                {
-                    url = s.SizeCollection[s.SizeCollection.Length - 2].Source;
-                }
-                else
-                {
-                    url = s.SizeCollection[s.SizeCollection.Length - 1].Source;
-                }
+            if (sizeRequired == "Small")
+            {
+                return p.SmallUrl;
+            }
 
-				foreach(FlickrNet.Size size in s.SizeCollection)
-				{
-					if( sizeRequired == size.Label ) 
-						url = size.Source;
-				}
-			}
-			catch(Exception)
-			{
-			}
+            if (sizeRequired == "Medium" && p.DoesMediumExist)
+            {
+                return p.MediumUrl;
+            }
 
-			return url;
+            if (sizeRequired == "Medium" && !p.DoesMediumExist)
+            {
+                return p.SmallUrl;
+            }
+
+            // sizeRequired == "Large"
+            if (p.DoesLargeExist) return p.LargeUrl;
+            if (p.DoesMediumExist) return p.MediumUrl;
+
+            return p.SmallUrl;
 		}
 	}
 }

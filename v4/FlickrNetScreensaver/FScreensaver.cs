@@ -9,6 +9,8 @@ using System.Threading;
 using FlickrNet;
 using log4net;
 using FlickrNetScreensaver.Properties;
+using System.Collections.Generic;
+using System.Net;
 
 namespace FlickrNetScreensaver
 {
@@ -215,42 +217,49 @@ namespace FlickrNetScreensaver
             string userName = Settings.Default.ShowUserUsername;
 			string userType = Settings.Default.ShowUserType;
 			FoundUser u = null;
-            Photo[] photos = null;
+            List<Photo> photos = new List<Photo>();
+            PhotoSearchExtras extras = PhotoSearchExtras.OwnerName | PhotoSearchExtras.AllUrls;
 
 			switch(userType)
 			{
 				case "Set":
-                    photos = flickr.PhotosetsGetPhotos(Settings.Default.ShowUserSetId).PhotoCollection;
+                    photos.AddRange(flickr.PhotosetsGetPhotos(Settings.Default.ShowUserSetId, extras));
 					break;
 				case "Tag":
-					u = flickr.PeopleFindByUsername(userName);
+					u = flickr.PeopleFindByUserName(userName);
                     string tags = Settings.Default.ShowUserTag;
-                    photos = flickr.PhotosSearch(u.UserId, tags, TagMode.AllTags, "", PhotoSearchExtras.OwnerName).PhotoCollection;
+                    PhotoSearchOptions o = new PhotoSearchOptions();
+                    o.UserId = u.UserId;
+                    o.Tags = tags;
+                    o.TagMode = TagMode.AllTags;
+                    o.Extras = extras;
+                    photos.AddRange(flickr.PhotosSearch(o));
 					break;
 				case "Fav":
-					u = flickr.PeopleFindByUsername(userName);
-                    photos = flickr.FavoritesGetPublicList(u.UserId, 200, 1).PhotoCollection;
+					u = flickr.PeopleFindByUserName(userName);
+                    photos.AddRange(flickr.FavoritesGetPublicList(u.UserId, DateTime.MinValue, DateTime.MinValue, extras, 1, 500));
 					break;
 				case "Contacts":
-                    u = flickr.PeopleFindByUsername(userName);
+                    u = flickr.PeopleFindByUserName(userName);
                     if (Settings.Default.ShowUserContact == "Own")
                     {
-                        PhotoSearchOptions o = new PhotoSearchOptions();
-                        o.UserId = u.UserId;
-                        o.Contacts = ContactSearch.AllContacts;
-                        o.ContentType = ContentTypeSearch.PhotosOnly;
-                        o.PerPage = 200;
-                        photos = flickr.PhotosSearch(o).PhotoCollection;
+                        PhotoSearchOptions o2 = new PhotoSearchOptions();
+                        o2.UserId = u.UserId;
+                        o2.Contacts = ContactSearch.AllContacts;
+                        o2.ContentType = ContentTypeSearch.PhotosOnly;
+                        o2.PerPage = 200;
+                        o2.Extras = extras;
+                        photos.AddRange(flickr.PhotosSearch(o2));
                     }
                     else
                     {
-                        photos = flickr.PhotosGetContactsPublicPhotos(u.UserId).PhotoCollection;
+                        photos.AddRange(flickr.PhotosGetContactsPublicPhotos(u.UserId, extras));
                     }
 					break;
 				case "All":
 				default:
-					u = flickr.PeopleFindByUsername(userName);
-					photos = flickr.PhotosSearch(u.UserId, "", TagMode.AllTags, "", 200, 1).PhotoCollection;
+					u = flickr.PeopleFindByUserName(userName);
+                    photos.AddRange(flickr.PeopleGetPublicPhotos(u.UserId, 1, 200, SafetyLevel.None, extras));
 					break;
 			}
             ImageManager.Initialise(photos);
@@ -259,36 +268,50 @@ namespace FlickrNetScreensaver
 		private void LoadGroup()
 		{
 			string groupid = flickr.UrlsLookupGroup("http://www.flickr.com/groups/" + Settings.Default.ShowGroupName);
-			ImageManager.Initialise(flickr.GroupPoolGetPhotos(groupid, 200, 1).PhotoCollection);
+            List<Photo> photos = new List<Photo>();
+            PhotoSearchExtras extras = PhotoSearchExtras.OwnerName | PhotoSearchExtras.AllUrls;
+            photos.AddRange(flickr.GroupsPoolsGetPhotos(groupid, null, null, extras, 1, 500));
+			ImageManager.Initialise(photos);
 		}
 
 		private void LoadEveryone()
 		{
+            List<Photo> photos = new List<Photo>();
+
             if (Settings.Default.ShowEveryoneType == "Recent")
             {
-                ImageManager.Initialise(flickr.PhotosGetRecent().PhotoCollection);
+                PhotoSearchExtras extras = PhotoSearchExtras.OwnerName | PhotoSearchExtras.AllUrls;
+                photos.AddRange(flickr.PhotosGetRecent(1, 500, extras));
             }
             else
             {
                 if (Settings.Default.ShowEveryoneTagInteresting == true)
                 {
-                    PhotoCollection photos = new PhotoCollection();
                     PhotoSearchOptions o = new PhotoSearchOptions();
                     o.Tags = Settings.Default.ShowEveryoneTag;
                     o.TagMode = TagMode.AllTags;
-                    o.SortOrder = PhotoSearchSortOrder.InterestingnessDesc;
+                    o.PerPage = 100;
+                    o.SortOrder = PhotoSearchSortOrder.InterestingnessDescending;
+                    o.Extras |= PhotoSearchExtras.OwnerName | PhotoSearchExtras.AllUrls;
                     for (int i = 0; i < 10; i++)
                     {
                         o.MinUploadDate = DateTime.Today.AddDays(-i);
                         o.MaxUploadDate = DateTime.Today.AddDays(-i).AddHours(23).AddHours(59);
-                        photos.AddRange(flickr.PhotosSearch(o).PhotoCollection);
+                        photos.AddRange(flickr.PhotosSearch(o));
                     }
-                    ImageManager.Initialise(photos);
                 }
                 else
                 {
-                    ImageManager.Initialise(flickr.PhotosSearch(Settings.Default.ShowEveryoneTag, TagMode.AllTags, null).PhotoCollection);
+                    PhotoSearchOptions o = new PhotoSearchOptions();
+                    o.Tags = Settings.Default.ShowEveryoneTag;
+                    o.TagMode = TagMode.AllTags;
+                    o.PerPage = 500;
+                    o.Extras |= PhotoSearchExtras.OwnerName | PhotoSearchExtras.AllUrls;
+                    photos.AddRange(flickr.PhotosSearch(o));
                 }
+
+                ImageManager.Initialise(photos);
+
             }
 		}
 
@@ -375,23 +398,25 @@ namespace FlickrNetScreensaver
             Logger.Debug("DoLoadNextPhoto - Enter");
 
             Photo p = ImageManager.NextPhoto;
-            string url = ImageManager.NextPhotoUrl;
+            Uri url = ImageManager.NextPhotoUrl;
             ImageManager.PopPhoto();
 
             AddToQueue(p.PhotoId);
 
             Image img = null;
-
-            try
+            using (WebClient client = new WebClient())
             {
-                img = Image.FromStream(flickr.DownloadPicture(url));
-            }
-            catch (FlickrException ex)
-            {
-                this.Visible = false;
-                MessageBox.Show("The screensaver has exited as an error occurred (" + ex.Message + ")");
-                Application.Exit();
-                return;
+                try
+                {
+                    img = Image.FromStream(client.OpenRead(url));
+                }
+                catch (FlickrException ex)
+                {
+                    this.Visible = false;
+                    MessageBox.Show("The screensaver has exited as an error occurred (" + ex.Message + ")");
+                    Application.Exit();
+                    return;
+                }
             }
 
             drawer.ChangeImage(img, p);
@@ -415,9 +440,11 @@ namespace FlickrNetScreensaver
             {
 #if DEBUG
                 if (e.KeyChar == 'q')
-                    Application.Exit();
+                {
+                    Close();
+                }
 #else
-                Application.Exit();
+                Close();
 #endif
             }
 		}
@@ -444,22 +471,16 @@ namespace FlickrNetScreensaver
             Settings.Default.Save();
 		}
 
-		#region Private Logger Class
 		private class Logger
 		{
-
-#if DEBUG
 			private static readonly ILog log = LogManager.GetLogger(typeof(FScreensaver));
-#endif
 
+            [System.Diagnostics.Conditional("DEBUG")]
 			public static void Debug(string debugLine)
 			{
-#if DEBUG
 				log.Debug(debugLine);
-#endif
 			}
 		}
-		#endregion
 
         private void loadNextPhotoWorker_DoWork(object sender, DoWorkEventArgs e)
         {

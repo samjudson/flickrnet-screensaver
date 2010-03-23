@@ -26,6 +26,9 @@ namespace FlickrNetScreensaver
 				case "Postcard":
 					drawer = new Drawers.PostcardDrawer();
 					break;
+                case "Stack":
+                    drawer = new Drawers.StackDrawer();
+                    break;
 				case "Plain":
 				default:
 					drawer = new Drawers.PlainDrawer();
@@ -45,6 +48,8 @@ namespace FlickrNetScreensaver
 					return new DrawOptions.MovingOptions();
 				case "Postcard":
 					return new DrawOptions.PostcardOptions();
+                case "Stack":
+                    return new DrawOptions.StackOptions();
 				case "Plain":
 				default:
 					return new DrawOptions.PlainOptions();
@@ -53,7 +58,7 @@ namespace FlickrNetScreensaver
 
 		public static string[] GetNames()
 		{
-			return new string[] { "Plain", "Postcard", "Moving" };
+			return new string[] { "Plain", "Postcard", "Moving", "Stack" };
 		}
 	}
 }

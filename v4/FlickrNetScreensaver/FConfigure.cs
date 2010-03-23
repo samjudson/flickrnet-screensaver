@@ -6,6 +6,8 @@ using System.Windows.Forms;
 
 using FlickrNet;
 using FlickrNetScreensaver.Properties;
+using System.Collections.Generic;
+using System.Net;
 
 namespace FlickrNetScreensaver
 {
@@ -1164,7 +1166,7 @@ namespace FlickrNetScreensaver
 			// Check user exists
 			try
 			{
-				u = flickr.PeopleFindByUsername(UserName.Text);
+				u = flickr.PeopleFindByUserName(UserName.Text);
 			}
 			catch(FlickrApiException ex)
 			{
@@ -1192,15 +1194,15 @@ namespace FlickrNetScreensaver
 			// Check set name
 			if( UserSet.Checked )
 			{
-				Photosets psets = flickr.PhotosetsGetList(u.UserId);
-				if( psets.PhotosetCollection == null )
+				PhotosetCollection psets = flickr.PhotosetsGetList(u.UserId);
+				if( psets == null || psets.Count == 0 )
 				{
 					MessageBox.Show("The user does not have any sets.");
 					return false;
 				}
 
 				bool bFound = false;
-				foreach(Photoset pset in psets.PhotosetCollection)
+				foreach(Photoset pset in psets)
 				{
 					if( pset.Title == UserSetName.Text )
 					{
@@ -1231,8 +1233,8 @@ namespace FlickrNetScreensaver
 				o.Tags = UserTagName.Text;
 				o.PerPage = 1;
 
-				Photos taggedPhotos = flickr.PhotosSearch(o);
-				if( taggedPhotos.TotalPhotos < 10 )
+				PhotoCollection taggedPhotos = flickr.PhotosSearch(o);
+				if( taggedPhotos.Total < 10 )
 				{
 					MessageBox.Show("Unable to find the tag/s in the users photos.");
 					return false;
@@ -1248,8 +1250,8 @@ namespace FlickrNetScreensaver
 
 			if( UserFav.Checked ) 
 			{
-				Photos photos = flickr.FavoritesGetPublicList(u.UserId);
-				if( photos.TotalPhotos == 0 )
+                PhotoCollection photos = flickr.FavoritesGetPublicList(u.UserId);
+				if( photos.Total == 0 )
 				{
 					MessageBox.Show("This user does not have any public favorites");
 					return false;
@@ -1264,7 +1266,7 @@ namespace FlickrNetScreensaver
 
 			if( UserContacts.Checked ) 
 			{
-				Photos photos = null;
+                List<Photo> photos = new List<Photo>();
 				if( flickr.IsAuthenticated )
 				{
 					Auth auth = flickr.AuthCheckToken(flickr.AuthToken);
@@ -1273,21 +1275,21 @@ namespace FlickrNetScreensaver
 						// show own contacts
 
                         Settings.Default.ShowUserContact = "Own";
-						photos = flickr.PhotosGetContactsPhotos(10, false, false, false);
+						photos.AddRange(flickr.PhotosGetContactsPhotos());
 					}
 					else
                     {
                         Settings.Default.ShowUserContact = "Others";
-						photos = flickr.PhotosGetContactsPublicPhotos(u.UserId, 10, false, false, false);
+                        photos.AddRange(flickr.PhotosGetContactsPublicPhotos(u.UserId));
 					}
 				}
 				else
 				{
                     Settings.Default.ShowUserContact = "Others";
-					photos = flickr.PhotosGetContactsPublicPhotos(u.UserId, 10, false, false, false);
+					photos.AddRange(flickr.PhotosGetContactsPublicPhotos(u.UserId));
 				}
 
-				if( photos.PhotoCollection.Length == 0 )
+				if( photos.Count == 0 )
 				{
                     if (flickr.IsAuthenticated)
                     {
@@ -1353,8 +1355,12 @@ namespace FlickrNetScreensaver
 
 			if( EveryoneTag.Checked )
 			{
-				Photos photos = flickr.PhotosSearch(EveryoneTagText.Text, TagMode.AllTags, null);
-				if( photos.TotalPhotos == 0 )
+                PhotoSearchOptions o = new PhotoSearchOptions();
+                o.Tags = EveryoneTagText.Text;
+                o.PerPage = 500;
+
+				PhotoCollection photos = flickr.PhotosSearch(o);
+				if( photos.Total == 0 )
 				{
 					MessageBox.Show("The tags did not return any photographs. Please check the tag you entered");
 					return false;
@@ -1445,13 +1451,20 @@ namespace FlickrNetScreensaver
 
 		private void DoRefreshRecentPhotos()
 		{
-			RecentPhotosImages.Images.Clear();
-			RecentPhotosList.Items.Clear();
+            this.Invoke(new MethodInvoker(delegate()
+            {
+                RecentPhotosImages.Images.Clear();
+                RecentPhotosList.Items.Clear();
+            }));
+
             string photoIds = Settings.Default.RecentPhotos;
 			if( String.IsNullOrEmpty(photoIds) ) 
 			{
-				RecentPhotosLabel.Text = "No recent photos to display.";
-				RecentPhotosLabel.Visible = true;
+                this.Invoke(new MethodInvoker(delegate()
+                {
+                    RecentPhotosLabel.Text = "No recent photos to display.";
+                    RecentPhotosLabel.Visible = true;
+                }));
 				return;
 			}
 
@@ -1462,17 +1475,29 @@ namespace FlickrNetScreensaver
 			foreach(string photoId in ids)
 			{
 				PhotoInfo info = f.PhotosGetInfo(photoId);
-				string url = info.SquareThumbnailUrl;
+				Uri url = info.SquareThumbnailUrl;
 
-				System.IO.Stream s = f.DownloadPicture(url);
-				Image img = Image.FromStream(s);
-				RecentPhotosImages.Images.Add(img);
+                using (WebClient client = new WebClient())
+                {
+                    Image img = Image.FromStream(client.OpenRead(url));
+                    this.Invoke(new MethodInvoker(delegate()
+                    {
+                        RecentPhotosImages.Images.Add(img);
+                    }));
+                }
 
-				ListViewItem item = new ListViewItem(new string[] { info.Title, info.Owner.UserName, info.WebUrl }, RecentPhotosImages.Images.Count - 1);
-				RecentPhotosList.Items.Add(item);
+				ListViewItem item = new ListViewItem(new string[] { info.Title, info.OwnerUserName, info.WebUrl.AbsoluteUri }, RecentPhotosImages.Images.Count - 1);
+                this.Invoke(new MethodInvoker(delegate()
+                {
+                    RecentPhotosList.Items.Add(item);
+                }));
 			}
 
-			RecentPhotosLabel.Visible = false;
+            this.Invoke(new MethodInvoker(delegate()
+            {
+                RecentPhotosLabel.Visible = false;
+            }));
+            
 
 			refreshRunning = false;
 		}
