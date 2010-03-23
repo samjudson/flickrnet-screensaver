@@ -223,21 +223,42 @@ namespace FlickrNetScreensaver
 			switch(userType)
 			{
 				case "Set":
-                    photos.AddRange(flickr.PhotosetsGetPhotos(Settings.Default.ShowUserSetId, extras));
+                    var photosetCollection = flickr.PhotosetsGetPhotos(Settings.Default.ShowUserSetId, extras, 1, 500);
+                    photos.AddRange(photosetCollection);
+                    if (photosetCollection.Total > 500)
+                    {
+                        photosetCollection = flickr.PhotosetsGetPhotos(Settings.Default.ShowUserSetId, extras, 2, 500);
+                        photos.AddRange(photosetCollection);
+                    }
 					break;
 				case "Tag":
 					u = flickr.PeopleFindByUserName(userName);
                     string tags = Settings.Default.ShowUserTag;
                     PhotoSearchOptions o = new PhotoSearchOptions();
                     o.UserId = u.UserId;
+                    o.ContentType = ContentTypeSearch.PhotosOnly;
                     o.Tags = tags;
                     o.TagMode = TagMode.AllTags;
                     o.Extras = extras;
-                    photos.AddRange(flickr.PhotosSearch(o));
+                    o.PerPage = 500;
+                    var tagCollection = flickr.PhotosSearch(o);
+                    photos.AddRange(tagCollection);
+                    if (tagCollection.Total > 500)
+                    {
+                        o.Page = 2;
+                        tagCollection = flickr.PhotosSearch(o);
+                        photos.AddRange(tagCollection);
+                    }
 					break;
 				case "Fav":
 					u = flickr.PeopleFindByUserName(userName);
-                    photos.AddRange(flickr.FavoritesGetPublicList(u.UserId, DateTime.MinValue, DateTime.MinValue, extras, 1, 500));
+                    var favCollection = flickr.FavoritesGetPublicList(u.UserId, DateTime.MinValue, DateTime.MinValue, extras, 1, 500);
+                    photos.AddRange(favCollection);
+                    if (favCollection.Total > 500)
+                    {
+                        favCollection = flickr.FavoritesGetPublicList(u.UserId, DateTime.MinValue, DateTime.MinValue, extras, 2, 500);
+                        photos.AddRange(favCollection);
+                    }
 					break;
 				case "Contacts":
                     u = flickr.PeopleFindByUserName(userName);
@@ -247,7 +268,7 @@ namespace FlickrNetScreensaver
                         o2.UserId = u.UserId;
                         o2.Contacts = ContactSearch.AllContacts;
                         o2.ContentType = ContentTypeSearch.PhotosOnly;
-                        o2.PerPage = 200;
+                        o2.PerPage = 500;
                         o2.Extras = extras;
                         photos.AddRange(flickr.PhotosSearch(o2));
                     }
@@ -270,7 +291,16 @@ namespace FlickrNetScreensaver
 			string groupid = flickr.UrlsLookupGroup("http://www.flickr.com/groups/" + Settings.Default.ShowGroupName);
             List<Photo> photos = new List<Photo>();
             PhotoSearchExtras extras = PhotoSearchExtras.OwnerName | PhotoSearchExtras.AllUrls;
-            photos.AddRange(flickr.GroupsPoolsGetPhotos(groupid, null, null, extras, 1, 500));
+            PhotoCollection photoCollection = flickr.GroupsPoolsGetPhotos(groupid, null, null, extras, 1, 500);
+            photos.AddRange(photoCollection);
+
+            // Get page 2 if there are lots of photos.
+            if (photoCollection.Total > 500)
+            {
+                photoCollection = flickr.GroupsPoolsGetPhotos(groupid, null, null, extras, 2, 500);
+                photos.AddRange(photoCollection);
+            }
+
 			ImageManager.Initialise(photos);
 		}
 
@@ -281,7 +311,10 @@ namespace FlickrNetScreensaver
             if (Settings.Default.ShowEveryoneType == "Recent")
             {
                 PhotoSearchExtras extras = PhotoSearchExtras.OwnerName | PhotoSearchExtras.AllUrls;
-                photos.AddRange(flickr.PhotosGetRecent(1, 500, extras));
+                var photoCollection = flickr.PhotosGetRecent(1, 500, extras);
+                photos.AddRange(photoCollection);
+                photoCollection = flickr.PhotosGetRecent(2, 500, extras);
+                photos.AddRange(photoCollection);
             }
             else
             {
@@ -290,10 +323,10 @@ namespace FlickrNetScreensaver
                     PhotoSearchOptions o = new PhotoSearchOptions();
                     o.Tags = Settings.Default.ShowEveryoneTag;
                     o.TagMode = TagMode.AllTags;
-                    o.PerPage = 100;
+                    o.PerPage = 50;
                     o.SortOrder = PhotoSearchSortOrder.InterestingnessDescending;
                     o.Extras |= PhotoSearchExtras.OwnerName | PhotoSearchExtras.AllUrls;
-                    for (int i = 0; i < 10; i++)
+                    for (int i = 0; i < 20; i++)
                     {
                         o.MinUploadDate = DateTime.Today.AddDays(-i);
                         o.MaxUploadDate = DateTime.Today.AddDays(-i).AddHours(23).AddHours(59);

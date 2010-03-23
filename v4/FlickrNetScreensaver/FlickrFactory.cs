@@ -30,19 +30,12 @@ namespace FlickrNetScreensaver
 
 			Flickr f = new Flickr(key, secret, token);
 
-			f.Proxy = GetProxy();
+			if( Settings.Default.ProxyUse ) f.Proxy = GetProxy();
 			return f;
 		}
 
 		public static WebProxy GetProxy()
 		{
-			bool useProxy = Settings.Default.ProxyUse;
-
-            if( !useProxy )
-			{
-				return WebProxy.GetDefaultProxy();
-			}
-
 			WebProxy proxy = new WebProxy();
 			proxy.Address = new Uri("http://" + Settings.Default.ProxyIPAddress + ":" + Settings.Default.ProxyPort);
 			if( !String.IsNullOrEmpty(Settings.Default.ProxyUsername) )
