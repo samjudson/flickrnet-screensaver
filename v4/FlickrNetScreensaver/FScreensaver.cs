@@ -20,15 +20,15 @@ namespace FlickrNetScreensaver
 	public class FScreensaver : System.Windows.Forms.Form
 	{
 
-		private static Queue previousPhotos = new Queue();
+		private static Queue<Photo> previousPhotos = new Queue<Photo>();
 
-		public static void AddToQueue(string photoId)
+		public static void AddToPreviousPhotosQueue(Photo photo)
 		{
 			while( previousPhotos.Count >= 5 )
 			{
 				previousPhotos.Dequeue();
 			}
-			previousPhotos.Enqueue(photoId);
+			previousPhotos.Enqueue(photo);
 		}
 
 		private System.ComponentModel.IContainer components;
@@ -43,6 +43,7 @@ namespace FlickrNetScreensaver
 		private System.Windows.Forms.Timer TimerLoadNextPhoto;
 		Point MouseXY = Point.Empty;
         private BackgroundWorker loadNextPhotoWorker;
+        private PictureBox NetworkErrorIcon;
 		private System.Windows.Forms.PictureBox flickrImage;
 
 		public FScreensaver(int screenNumber)
@@ -89,7 +90,9 @@ namespace FlickrNetScreensaver
             this.flickrImage = new System.Windows.Forms.PictureBox();
             this.TimerReloadPhotos = new System.Windows.Forms.Timer(this.components);
             this.loadNextPhotoWorker = new System.ComponentModel.BackgroundWorker();
+            this.NetworkErrorIcon = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.flickrImage)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NetworkErrorIcon)).BeginInit();
             this.SuspendLayout();
             // 
             // TimerLoadNextPhoto
@@ -117,11 +120,24 @@ namespace FlickrNetScreensaver
             this.loadNextPhotoWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.loadNextPhotoWorker_DoWork);
             this.loadNextPhotoWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.loadNextPhotoWorker_RunWorkerCompleted);
             // 
+            // NetworkErrorIcon
+            // 
+            this.NetworkErrorIcon.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.NetworkErrorIcon.Image = global::FlickrNetScreensaver.Properties.Resources.NetworkDisconnectedSmall;
+            this.NetworkErrorIcon.Location = new System.Drawing.Point(483, 343);
+            this.NetworkErrorIcon.Margin = new System.Windows.Forms.Padding(0);
+            this.NetworkErrorIcon.Name = "NetworkErrorIcon";
+            this.NetworkErrorIcon.Size = new System.Drawing.Size(75, 75);
+            this.NetworkErrorIcon.TabIndex = 2;
+            this.NetworkErrorIcon.TabStop = false;
+            this.NetworkErrorIcon.Visible = false;
+            // 
             // FScreensaver
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
             this.BackColor = System.Drawing.Color.Black;
-            this.ClientSize = new System.Drawing.Size(292, 266);
+            this.ClientSize = new System.Drawing.Size(567, 427);
+            this.Controls.Add(this.NetworkErrorIcon);
             this.Controls.Add(this.flickrImage);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.KeyPreview = true;
@@ -134,6 +150,7 @@ namespace FlickrNetScreensaver
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.FScreensaver_KeyPress);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.FScreensaver_MouseMove);
             ((System.ComponentModel.ISupportInitialize)(this.flickrImage)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NetworkErrorIcon)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -174,7 +191,14 @@ namespace FlickrNetScreensaver
 			TimerLoadNextPhoto.Enabled = true;
 			TimerLoadNextPhoto_Tick(null, EventArgs.Empty);
 
+            System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged += new System.Net.NetworkInformation.NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
+
 		}
+
+        void NetworkChange_NetworkAvailabilityChanged(object sender, System.Net.NetworkInformation.NetworkAvailabilityEventArgs e)
+        {
+            NetworkErrorIcon.Visible = !e.IsAvailable;
+        }
 
 		private void LoadSettings()
 		{
@@ -431,10 +455,9 @@ namespace FlickrNetScreensaver
             Logger.Debug("DoLoadNextPhoto - Enter");
 
             Photo p = ImageManager.NextPhoto;
-            Uri url = ImageManager.NextPhotoUrl;
-            ImageManager.PopPhoto();
+            Uri url = ImageManager.CalcUrl(p);
 
-            AddToQueue(p.PhotoId);
+            AddToPreviousPhotosQueue(p);
 
             Image img = null;
             using (WebClient client = new WebClient())
@@ -494,13 +517,13 @@ namespace FlickrNetScreensaver
 			{
 			}
 
-			string photoIds = "";
+            List<string> photoIds = new List<string>();
 			while(previousPhotos.Count > 0 )
 			{
-				photoIds += (string)previousPhotos.Dequeue() + "|";
+                Photo photo = previousPhotos.Dequeue();
+                photoIds.Add(photo.PhotoId);
 			}
-			if( photoIds.Length > 0 ) photoIds = photoIds.Substring(0, photoIds.Length-1);
-            Settings.Default.RecentPhotos = photoIds;
+            Settings.Default.RecentPhotos = String.Join("|",photoIds.ToArray());
             Settings.Default.Save();
 		}
 
