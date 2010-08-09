@@ -107,24 +107,24 @@ namespace FlickrNetScreensaver
 
             if (sizeRequired == "Small")
             {
-                return p.SmallUrl;
+                return new Uri(p.SmallUrl);
             }
 
             if (sizeRequired == "Medium" && p.DoesMediumExist)
             {
-                return p.MediumUrl;
+                return new Uri(p.MediumUrl);
             }
 
             if (sizeRequired == "Medium" && !p.DoesMediumExist)
             {
-                return p.SmallUrl;
+                return new Uri(p.SmallUrl);
             }
 
             // sizeRequired == "Large"
-            if (p.DoesLargeExist) return p.LargeUrl;
-            if (p.DoesMediumExist) return p.MediumUrl;
+            if (p.DoesLargeExist) return new Uri(p.LargeUrl);
+            if (p.DoesMediumExist) return new Uri(p.MediumUrl);
 
-            return p.SmallUrl;
+            return new Uri(p.SmallUrl);
 		}
 
         private static void InitialiseBackupPhotos()

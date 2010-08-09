@@ -1475,7 +1475,7 @@ namespace FlickrNetScreensaver
 			foreach(string photoId in ids)
 			{
 				PhotoInfo info = f.PhotosGetInfo(photoId);
-				Uri url = info.SquareThumbnailUrl;
+				Uri url = new Uri(info.SquareThumbnailUrl);
 
                 using (WebClient client = new WebClient())
                 {
@@ -1486,7 +1486,7 @@ namespace FlickrNetScreensaver
                     }));
                 }
 
-				ListViewItem item = new ListViewItem(new string[] { info.Title, info.OwnerUserName, info.WebUrl.AbsoluteUri }, RecentPhotosImages.Images.Count - 1);
+				ListViewItem item = new ListViewItem(new string[] { info.Title, info.OwnerUserName, info.WebUrl }, RecentPhotosImages.Images.Count - 1);
                 this.Invoke(new MethodInvoker(delegate()
                 {
                     RecentPhotosList.Items.Add(item);
