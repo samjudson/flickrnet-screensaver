@@ -27,7 +27,7 @@ namespace FlickrNetScreensaver.Drawers
 			_pictureForm.Controls.Add(_pictureBox);
 			_pictureBox.SendToBack();
 
-			_pictureBox.MouseMove += new MouseEventHandler(_pictureForm.FScreensaver_MouseMove);
+			_pictureBox.MouseMove += new MouseEventHandler(_pictureForm.FScreensaverMouseMove);
 
 			_timer = new Timer();
 			_timer.Tick += new EventHandler(_timer_Tick);

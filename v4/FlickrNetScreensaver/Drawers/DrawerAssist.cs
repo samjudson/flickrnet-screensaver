@@ -7,23 +7,22 @@ namespace FlickrNetScreensaver.Drawers
 	/// <summary>
 	/// Summary description for DrawerAssist.
 	/// </summary>
-	public sealed class DrawerAssist
+	public static class DrawerAssist
 	{
-        private static Random rand = new Random();
-        private DrawerAssist() { }
+        private static readonly Random Rand = new Random();
 
-		public static void FinalImage(ref Image image, int width, int height)
+	    public static void FinalImage(ref Image image, int width, int height)
 		{
 			Image finalImage = new Bitmap(width, height);
-			using( Graphics finalGraphics = Graphics.FromImage(finalImage)) 
+			using(var finalGraphics = Graphics.FromImage(finalImage)) 
 			{
 				finalGraphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
 				finalGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
 				finalGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-				bool fillScreen = Settings.Default.DrawerFillScreen;
+				var fillScreen = Settings.Default.DrawerFillScreen;
 
-				double scale = 1.0;
+				var scale = 1.0;
 
 				if( fillScreen )
 				{
@@ -49,8 +48,8 @@ namespace FlickrNetScreensaver.Drawers
 					}
 				}
 
-				int newWidth = (int)(image.Width * scale);
-				int newHeight = (int)(image.Height * scale);
+				var newWidth = (int)(image.Width * scale);
+				var newHeight = (int)(image.Height * scale);
 
 				finalGraphics.DrawImage(image, (width - newWidth) / 2, (height - newHeight) / 2, newWidth, newHeight);
 
@@ -70,13 +69,13 @@ namespace FlickrNetScreensaver.Drawers
                 finalImage = previousImage;
             }
             
-            using (Graphics finalGraphics = Graphics.FromImage(finalImage))
+            using (var finalGraphics = Graphics.FromImage(finalImage))
             {
                 finalGraphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
                 finalGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                 finalGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-                double scale = 1.0;
+                var scale = 1.0;
 
                 if (fillScreen)
                 {
@@ -102,10 +101,10 @@ namespace FlickrNetScreensaver.Drawers
                     }
                 }
 
-                int newWidth = (int)(image.Width * scale);
-                int newHeight = (int)(image.Height * scale);
+                var newWidth = (int)(image.Width * scale);
+                var newHeight = (int)(image.Height * scale);
 
-                finalGraphics.DrawImage(image, rand.Next(0, width - newWidth), rand.Next(0, height - newHeight), newWidth, newHeight);
+                finalGraphics.DrawImage(image, Rand.Next(0, width - newWidth), Rand.Next(0, height - newHeight), newWidth, newHeight);
                 finalGraphics.Dispose();
             }
 

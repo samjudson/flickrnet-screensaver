@@ -41,9 +41,9 @@ namespace FlickrNetScreensaver.Drawers
 			_pictureForm.Controls.Add(_pictureBox);
 			_pictureBox.SendToBack();
 
-			_pictureBox.MouseUp += new MouseEventHandler(_pictureForm.FScreensaver_MouseMove);
-			_pictureBox.MouseDown += new MouseEventHandler(_pictureForm.FScreensaver_MouseMove);
-			_pictureBox.MouseMove += new MouseEventHandler(_pictureForm.FScreensaver_MouseMove);
+			_pictureBox.MouseUp += new MouseEventHandler(_pictureForm.FScreensaverMouseMove);
+			_pictureBox.MouseDown += new MouseEventHandler(_pictureForm.FScreensaverMouseMove);
+			_pictureBox.MouseMove += new MouseEventHandler(_pictureForm.FScreensaverMouseMove);
 		}
 
 		public void ChangeImage(System.Drawing.Image img, Photo photo)

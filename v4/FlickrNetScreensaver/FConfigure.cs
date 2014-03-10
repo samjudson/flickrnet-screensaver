@@ -171,9 +171,9 @@ namespace FlickrNetScreensaver
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.RecentPhotosLabel = new System.Windows.Forms.Label();
             this.RecentPhotosList = new System.Windows.Forms.ListView();
-            this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader3 = new System.Windows.Forms.ColumnHeader();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.RecentPhotosImages = new System.Windows.Forms.ImageList(this.components);
             this.label10 = new System.Windows.Forms.Label();
             this.tabPage5 = new System.Windows.Forms.TabPage();
@@ -231,8 +231,8 @@ namespace FlickrNetScreensaver
             // 
             // TabControl
             // 
-            this.TabControl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.TabControl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.TabControl.Controls.Add(this.tabPage1);
             this.TabControl.Controls.Add(this.tabPage2);
             this.TabControl.Controls.Add(this.tabPage4);
@@ -262,8 +262,8 @@ namespace FlickrNetScreensaver
             // 
             // GroupWhat
             // 
-            this.GroupWhat.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.GroupWhat.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.GroupWhat.Controls.Add(this.label4);
             this.GroupWhat.Controls.Add(this.label3);
             this.GroupWhat.Controls.Add(this.GroupName);
@@ -302,9 +302,9 @@ namespace FlickrNetScreensaver
             // 
             // EveryoneWhat
             // 
-            this.EveryoneWhat.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.EveryoneWhat.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.EveryoneWhat.Controls.Add(this.EveryoneTagInteresting);
             this.EveryoneWhat.Controls.Add(this.EveryoneTagText);
             this.EveryoneWhat.Controls.Add(this.EveryoneTag);
@@ -356,8 +356,8 @@ namespace FlickrNetScreensaver
             // 
             // UserWhat
             // 
-            this.UserWhat.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.UserWhat.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.UserWhat.Controls.Add(this.UserTagName);
             this.UserWhat.Controls.Add(this.UserName);
             this.UserWhat.Controls.Add(this.label2);
@@ -644,7 +644,7 @@ namespace FlickrNetScreensaver
             this.label9.Size = new System.Drawing.Size(288, 32);
             this.label9.TabIndex = 5;
             this.label9.Text = "Authentication is only required to view private photos, or those in private group" +
-                "s.";
+    "s.";
             // 
             // AuthRemoveButton
             // 
@@ -653,7 +653,7 @@ namespace FlickrNetScreensaver
             this.AuthRemoveButton.Size = new System.Drawing.Size(288, 24);
             this.AuthRemoveButton.TabIndex = 4;
             this.AuthRemoveButton.Text = "Remove Authentication";
-            this.AuthRemoveButton.Click += new System.EventHandler(this.AuthRemoveButton_Click);
+            this.AuthRemoveButton.Click += new System.EventHandler(this.AuthRemoveButtonClick);
             // 
             // AuthTokenLabel
             // 
@@ -662,7 +662,7 @@ namespace FlickrNetScreensaver
             this.AuthTokenLabel.Size = new System.Drawing.Size(280, 32);
             this.AuthTokenLabel.TabIndex = 3;
             this.AuthTokenLabel.Text = "We currently have a token stored. If it does not appear to be working then feel f" +
-                "ree to reauthenticate.";
+    "ree to reauthenticate.";
             // 
             // AuthCompleteButton
             // 
@@ -672,7 +672,7 @@ namespace FlickrNetScreensaver
             this.AuthCompleteButton.Size = new System.Drawing.Size(288, 24);
             this.AuthCompleteButton.TabIndex = 2;
             this.AuthCompleteButton.Text = "Complete Authentication";
-            this.AuthCompleteButton.Click += new System.EventHandler(this.AuthCompleteButton_Click);
+            this.AuthCompleteButton.Click += new System.EventHandler(this.AuthCompleteButtonClick);
             // 
             // AuthButton
             // 
@@ -681,7 +681,7 @@ namespace FlickrNetScreensaver
             this.AuthButton.Size = new System.Drawing.Size(288, 24);
             this.AuthButton.TabIndex = 1;
             this.AuthButton.Text = "Authenticate";
-            this.AuthButton.Click += new System.EventHandler(this.AuthButton_Click);
+            this.AuthButton.Click += new System.EventHandler(this.AuthButtonClick);
             // 
             // label8
             // 
@@ -729,7 +729,7 @@ namespace FlickrNetScreensaver
             this.RecentPhotosList.TabIndex = 0;
             this.RecentPhotosList.UseCompatibleStateImageBehavior = false;
             this.RecentPhotosList.SelectedIndexChanged += new System.EventHandler(this.RecentPhotosList_SelectedIndexChanged);
-            this.RecentPhotosList.DoubleClick += new System.EventHandler(this.RecentPhotosList_DoubleClick);
+            this.RecentPhotosList.DoubleClick += new System.EventHandler(this.RecentPhotosListDoubleClick);
             // 
             // columnHeader1
             // 
@@ -869,7 +869,7 @@ namespace FlickrNetScreensaver
             this.ProxyDefined.Size = new System.Drawing.Size(272, 24);
             this.ProxyDefined.TabIndex = 0;
             this.ProxyDefined.Text = "Define Proxy (if unchecked it will use IE defaults)";
-            this.ProxyDefined.CheckedChanged += new System.EventHandler(this.ProxyDefined_CheckedChanged);
+            this.ProxyDefined.CheckedChanged += new System.EventHandler(this.ProxyDefinedCheckedChanged);
             // 
             // AboutButton
             // 
@@ -1515,9 +1515,9 @@ namespace FlickrNetScreensaver
 			toolTip1.SetToolTip(RecentPhotosList, "by " + item.SubItems[1].Text);
 		}
 
-		private void RecentPhotosList_DoubleClick(object sender, System.EventArgs e)
+		private void RecentPhotosListDoubleClick(object sender, System.EventArgs e)
 		{
-			ListViewItem item = RecentPhotosList.SelectedItems[0];
+			var item = RecentPhotosList.SelectedItems[0];
 
 			try
 			{
@@ -1529,11 +1529,11 @@ namespace FlickrNetScreensaver
 			}
 		}
 
-		private void AuthButton_Click(object sender, System.EventArgs e)
+		private void AuthButtonClick(object sender, EventArgs e)
 		{
-			Flickr f = FlickrFactory.GetInstance();
+			var f = FlickrFactory.GetInstance();
 			TempFrob = f.AuthGetFrob();
-			string url = f.AuthCalcUrl(TempFrob, AuthLevel.Read);
+			var url = f.AuthCalcUrl(TempFrob, AuthLevel.Read);
 
 			AuthCompleteButton.Enabled = true;
 			AuthButton.Enabled = false;
@@ -1541,12 +1541,12 @@ namespace FlickrNetScreensaver
 			System.Diagnostics.Process.Start(url);
 		}
 
-		private void AuthCompleteButton_Click(object sender, System.EventArgs e)
+		private void AuthCompleteButtonClick(object sender, EventArgs e)
 		{
-			Flickr f = FlickrFactory.GetInstance();
+			var f = FlickrFactory.GetInstance();
 			try
 			{
-				Auth auth = f.AuthGetToken(TempFrob);
+				var auth = f.AuthGetToken(TempFrob);
 				Token = auth.Token;
 			}
 			catch(FlickrException ex)
@@ -1563,7 +1563,7 @@ namespace FlickrNetScreensaver
 			MessageBox.Show("Authentication successful!");
 		}
 
-		private void AuthRemoveButton_Click(object sender, System.EventArgs e)
+		private void AuthRemoveButtonClick(object sender, System.EventArgs e)
 		{
 			Token = null;
 
@@ -1572,7 +1572,7 @@ namespace FlickrNetScreensaver
 			AuthTokenLabel.Visible = false;
 		}
 
-		private void ProxyDefined_CheckedChanged(object sender, System.EventArgs e)
+		private void ProxyDefinedCheckedChanged(object sender, System.EventArgs e)
 		{
 			ProxyPanel.Enabled = ProxyDefined.Checked;
 		}

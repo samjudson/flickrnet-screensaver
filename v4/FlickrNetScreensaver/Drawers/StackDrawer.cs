@@ -41,9 +41,9 @@ namespace FlickrNetScreensaver.Drawers
 
             _pictureBox = new PictureBox();
             _pictureBox.Dock = DockStyle.Fill;
-            _pictureBox.MouseUp += new MouseEventHandler(_pictureForm.FScreensaver_MouseMove);
-            _pictureBox.MouseDown += new MouseEventHandler(_pictureForm.FScreensaver_MouseMove);
-            _pictureBox.MouseMove += new MouseEventHandler(_pictureForm.FScreensaver_MouseMove);
+            _pictureBox.MouseUp += new MouseEventHandler(_pictureForm.FScreensaverMouseMove);
+            _pictureBox.MouseDown += new MouseEventHandler(_pictureForm.FScreensaverMouseMove);
+            _pictureBox.MouseMove += new MouseEventHandler(_pictureForm.FScreensaverMouseMove);
 
             _pictureForm.Controls.Add(_pictureBox);
             _pictureBox.SendToBack();

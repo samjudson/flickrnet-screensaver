@@ -14,10 +14,6 @@ namespace FlickrNetScreensaver
         [STAThread]
         static void Main(string[] args)
         {
-            //Application.EnableVisualStyles();
-            //Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new Form1());
-
 #if !DEBUG
 			Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
 #endif
@@ -32,10 +28,10 @@ namespace FlickrNetScreensaver
 					case "/c":
 						Application.EnableVisualStyles();
 						Application.DoEvents();
-						System.Windows.Forms.Application.Run(new FConfigure());
+						Application.Run(new FConfigure());
 						break;
 					case "/s":
-						System.Windows.Forms.Application.Run(new FScreensaver(0));
+						Application.Run(new FScreensaver(0));
 						break;
 					case "/p":
 						break;
@@ -51,15 +47,15 @@ namespace FlickrNetScreensaver
 				{
 					Application.EnableVisualStyles();
 					Application.DoEvents();
-					System.Windows.Forms.Application.Run(new FConfigure());
+					Application.Run(new FConfigure());
 				}
 				else
 				{
-					System.Windows.Forms.Application.Run(new FScreensaver(0));
+					Application.Run(new FScreensaver(0));
 				}
 #endif
 #if !DEBUG
-				System.Windows.Forms.Application.Run(new FScreensaver(0));
+				Application.Run(new FScreensaver(0));
 #endif
 			}
 		}

@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Specialized;
-
+using System.Net;
 using FlickrNet;
 using FlickrNetScreensaver.Properties;
 using System.Collections.Generic;
@@ -19,26 +17,25 @@ namespace FlickrNetScreensaver
         public static int BackupPhotoCount { get; set; }
 
 		// Store the photo in this collection
-        private static readonly List<Photo> initialCollection = new List<Photo>();
+        private static readonly List<Photo> InitialCollection = new List<Photo>();
 
 		// contains list of photos to download
-        private static readonly List<Photo> photosToDownload = new List<Photo>();
+        private static readonly List<Photo> PhotosToDownload = new List<Photo>();
 
         // contains 5 photos to use in event of network failure
-        private static readonly List<Photo> backupPhotos = new List<Photo>();
+        private static readonly List<Photo> BackupPhotos = new List<Photo>();
 
 		// The flickr instance
-		private static readonly Flickr flickr = FlickrFactory.GetInstance();
-		private static string sizeRequired;
+	    private static readonly string SizeRequired;
 
-		private static int nextIndex;
-        private static int nextBackupPhoto;
-		private static Random rand = new Random();
+		private static int _nextIndex;
+        private static int _nextBackupPhoto;
+		private static readonly Random Rand = new Random();
 
 		static ImageManager()
 		{
             BackupPhotoCount = 5;
-            sizeRequired = Settings.Default.DrawerImageSize;
+            SizeRequired = Settings.Default.DrawerImageSize;
 		}
 
 		/// <summary>
@@ -47,12 +44,12 @@ namespace FlickrNetScreensaver
 		/// <param name="photos"></param>
 		public static void Initialise(List<Photo> photos)
 		{
-			initialCollection.AddRange(photos);
-			photosToDownload.AddRange(photos);
+			InitialCollection.AddRange(photos);
+			PhotosToDownload.AddRange(photos);
 
-			nextIndex = rand.Next(0, photosToDownload.Count);
+			_nextIndex = Rand.Next(0, PhotosToDownload.Count);
 
-            Thread t = new Thread(new ThreadStart(InitialiseBackupPhotos));
+            var t = new Thread(InitialiseBackupPhotos);
             t.Start();
 		}
 
@@ -68,7 +65,7 @@ namespace FlickrNetScreensaver
         {
             get
             {
-                return nextBackupPhoto++ % BackupPhotoCount;
+                return _nextBackupPhoto++ % BackupPhotoCount;
             }
         }
 		public static Photo NextPhoto
@@ -77,11 +74,11 @@ namespace FlickrNetScreensaver
 			{
                 if (!IsNetworkConnection)
                 {
-                    int i = NextBackupPhoto;
+                    var i = NextBackupPhoto;
                     Debug.WriteLine("Disconnected. Download backup photo " + i);
-                    return backupPhotos[i];
+                    return BackupPhotos[i];
                 }
-                Photo p = photosToDownload[nextIndex];
+                var p = PhotosToDownload[_nextIndex];
                 PopPhoto();
                 return p;
 			}
@@ -89,33 +86,33 @@ namespace FlickrNetScreensaver
 
         private static void PopPhoto()
 		{
-			photosToDownload.RemoveAt(nextIndex);
+			PhotosToDownload.RemoveAt(_nextIndex);
 
-			if( photosToDownload.Count == 0 )
-				photosToDownload.AddRange(initialCollection);
+			if( PhotosToDownload.Count == 0 )
+				PhotosToDownload.AddRange(InitialCollection);
 
-			nextIndex = rand.Next(0, photosToDownload.Count);
+			_nextIndex = Rand.Next(0, PhotosToDownload.Count);
 		}
 
 		public static Uri CalcUrl(Photo p)
 		{
-            if (backupPhotos.Contains(p))
+            if (BackupPhotos.Contains(p))
             {
                 Debug.WriteLine("Calculate Url for backup photo " + p.PhotoId);
                 return new Uri(CalculateBackupFilename(p));
             }
 
-            if (sizeRequired == "Small")
+            if (SizeRequired == "Small")
             {
                 return new Uri(p.SmallUrl);
             }
 
-            if (sizeRequired == "Medium" && p.DoesMediumExist)
+            if (SizeRequired == "Medium" && p.DoesMediumExist)
             {
                 return new Uri(p.MediumUrl);
             }
 
-            if (sizeRequired == "Medium" && !p.DoesMediumExist)
+            if (SizeRequired == "Medium" && !p.DoesMediumExist)
             {
                 return new Uri(p.SmallUrl);
             }
@@ -129,44 +126,43 @@ namespace FlickrNetScreensaver
 
         private static void InitialiseBackupPhotos()
         {
-            string path = CalculateBackupDirectory();
+            var path = CalculateBackupDirectory();
             if (Directory.Exists(path)) Directory.Delete(path, true);
             Directory.CreateDirectory(path);
 
-            if (backupPhotos.Count == 0)
+            if (BackupPhotos.Count != 0) return;
+
+            for (var i = 0; i < BackupPhotoCount; i++)
             {
-                for (int i = 0; i < BackupPhotoCount; i++)
+                var p = InitialCollection[new Random().Next(0, InitialCollection.Count)];
+
+                Debug.WriteLine("Downloading backup photo " + p.PhotoId);
+
+                var filename = CalculateBackupFilename(p);
+
+                var url = CalcUrl(p);
+
+                using (var client = new WebClient())
                 {
-                    Photo p = initialCollection[new Random().Next(0, initialCollection.Count)];
-
-                    Debug.WriteLine("Downloading backup photo " + p.PhotoId);
-
-                    string filename = CalculateBackupFilename(p);
-
-                    Uri url = CalcUrl(p);
-
-                    using (System.Net.WebClient client = new System.Net.WebClient())
-                    {
-                        client.DownloadFile(url, filename);
-                    }
-
-                    Debug.WriteLine("File successfully downloaded to " + filename);
-
-                    backupPhotos.Add(p);
+                    client.DownloadFile(url, filename);
                 }
+
+                Debug.WriteLine("File successfully downloaded to " + filename);
+
+                BackupPhotos.Add(p);
             }
         }
 
         private static string CalculateBackupFilename(Photo p)
         {
-            string filename = CalculateBackupDirectory();
+            var filename = CalculateBackupDirectory();
             filename = Path.Combine(filename, p.PhotoId + ".jpg");
             return filename;
         }
 
         private static string CalculateBackupDirectory()
         {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             path = Path.Combine(path, "BackupFiles");
             return path;
         }
