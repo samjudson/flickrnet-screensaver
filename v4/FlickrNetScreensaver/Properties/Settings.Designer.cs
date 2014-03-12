@@ -121,10 +121,9 @@ namespace FlickrNetScreensaver.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string AuthenticationToken {
+        public global::FlickrNet.OAuthAccessToken AuthenticationToken {
             get {
-                return ((string)(this["AuthenticationToken"]));
+                return ((global::FlickrNet.OAuthAccessToken)(this["AuthenticationToken"]));
             }
             set {
                 this["AuthenticationToken"] = value;

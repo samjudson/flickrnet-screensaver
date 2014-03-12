@@ -62,11 +62,9 @@ namespace FlickrNetScreensaver
 		private System.Windows.Forms.ColumnHeader columnHeader3;
 		private System.Windows.Forms.Label label10;
 		private System.Windows.Forms.Label label8;
-		private System.Windows.Forms.Button AuthButton;
-		private System.Windows.Forms.Button AuthCompleteButton;
+        private System.Windows.Forms.Button AuthButton;
 		private System.ComponentModel.IContainer components;
 
-		private string TempFrob;
 		private System.Windows.Forms.Label AuthTokenLabel;
 		private System.Windows.Forms.Button AuthRemoveButton;
 		private System.Windows.Forms.Label label9;
@@ -86,7 +84,10 @@ namespace FlickrNetScreensaver
 		private System.Windows.Forms.Panel ProxyPanel;
 		private System.Windows.Forms.Label RecentPhotosLabel;
         private CheckBox EveryoneTagInteresting;
-		private string Token;
+        private Panel CompletePanel;
+        private TextBox VerifierTextBox;
+        private Label label15;
+        private Button AuthCompleteButton;
 
 		public FConfigure()
 		{
@@ -165,7 +166,6 @@ namespace FlickrNetScreensaver
             this.label9 = new System.Windows.Forms.Label();
             this.AuthRemoveButton = new System.Windows.Forms.Button();
             this.AuthTokenLabel = new System.Windows.Forms.Label();
-            this.AuthCompleteButton = new System.Windows.Forms.Button();
             this.AuthButton = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
             this.tabPage3 = new System.Windows.Forms.TabPage();
@@ -191,6 +191,10 @@ namespace FlickrNetScreensaver
             this.ProxyDefined = new System.Windows.Forms.CheckBox();
             this.AboutButton = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.CompletePanel = new System.Windows.Forms.Panel();
+            this.VerifierTextBox = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.AuthCompleteButton = new System.Windows.Forms.Button();
             this.TabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.GroupWhat.SuspendLayout();
@@ -203,6 +207,7 @@ namespace FlickrNetScreensaver
             this.tabPage3.SuspendLayout();
             this.tabPage5.SuspendLayout();
             this.ProxyPanel.SuspendLayout();
+            this.CompletePanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // BtnOK
@@ -227,7 +232,7 @@ namespace FlickrNetScreensaver
             this.BtnCancel.Size = new System.Drawing.Size(72, 24);
             this.BtnCancel.TabIndex = 2;
             this.BtnCancel.Text = "Cancel";
-            this.BtnCancel.Click += new System.EventHandler(this.BtnCancel_Click);
+            this.BtnCancel.Click += new System.EventHandler(this.BtnCancelClick);
             // 
             // TabControl
             // 
@@ -425,7 +430,7 @@ namespace FlickrNetScreensaver
             this.UserTag.Size = new System.Drawing.Size(80, 32);
             this.UserTag.TabIndex = 6;
             this.UserTag.Text = "With Tag:";
-            this.UserTag.CheckedChanged += new System.EventHandler(this.UserTag_CheckedChanged);
+            this.UserTag.CheckedChanged += new System.EventHandler(this.UserTagCheckedChanged);
             // 
             // UserSet
             // 
@@ -435,7 +440,7 @@ namespace FlickrNetScreensaver
             this.UserSet.Size = new System.Drawing.Size(80, 32);
             this.UserSet.TabIndex = 5;
             this.UserSet.Text = "From Set:";
-            this.UserSet.CheckedChanged += new System.EventHandler(this.UserSet_CheckedChanged);
+            this.UserSet.CheckedChanged += new System.EventHandler(this.UserSetCheckedChanged);
             // 
             // UserAll
             // 
@@ -627,9 +632,9 @@ namespace FlickrNetScreensaver
             this.tabPage4.Controls.Add(this.label9);
             this.tabPage4.Controls.Add(this.AuthRemoveButton);
             this.tabPage4.Controls.Add(this.AuthTokenLabel);
-            this.tabPage4.Controls.Add(this.AuthCompleteButton);
             this.tabPage4.Controls.Add(this.AuthButton);
             this.tabPage4.Controls.Add(this.label8);
+            this.tabPage4.Controls.Add(this.CompletePanel);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Size = new System.Drawing.Size(392, 390);
@@ -648,7 +653,7 @@ namespace FlickrNetScreensaver
             // 
             // AuthRemoveButton
             // 
-            this.AuthRemoveButton.Location = new System.Drawing.Point(48, 288);
+            this.AuthRemoveButton.Location = new System.Drawing.Point(48, 327);
             this.AuthRemoveButton.Name = "AuthRemoveButton";
             this.AuthRemoveButton.Size = new System.Drawing.Size(288, 24);
             this.AuthRemoveButton.TabIndex = 4;
@@ -657,22 +662,12 @@ namespace FlickrNetScreensaver
             // 
             // AuthTokenLabel
             // 
-            this.AuthTokenLabel.Location = new System.Drawing.Point(56, 256);
+            this.AuthTokenLabel.Location = new System.Drawing.Point(48, 295);
             this.AuthTokenLabel.Name = "AuthTokenLabel";
-            this.AuthTokenLabel.Size = new System.Drawing.Size(280, 32);
+            this.AuthTokenLabel.Size = new System.Drawing.Size(288, 32);
             this.AuthTokenLabel.TabIndex = 3;
             this.AuthTokenLabel.Text = "We currently have a token stored. If it does not appear to be working then feel f" +
     "ree to reauthenticate.";
-            // 
-            // AuthCompleteButton
-            // 
-            this.AuthCompleteButton.Enabled = false;
-            this.AuthCompleteButton.Location = new System.Drawing.Point(52, 183);
-            this.AuthCompleteButton.Name = "AuthCompleteButton";
-            this.AuthCompleteButton.Size = new System.Drawing.Size(288, 24);
-            this.AuthCompleteButton.TabIndex = 2;
-            this.AuthCompleteButton.Text = "Complete Authentication";
-            this.AuthCompleteButton.Click += new System.EventHandler(this.AuthCompleteButtonClick);
             // 
             // AuthButton
             // 
@@ -882,6 +877,42 @@ namespace FlickrNetScreensaver
             this.AboutButton.Text = "About";
             this.AboutButton.Click += new System.EventHandler(this.AboutButton_Click);
             // 
+            // CompletePanel
+            // 
+            this.CompletePanel.Controls.Add(this.VerifierTextBox);
+            this.CompletePanel.Controls.Add(this.label15);
+            this.CompletePanel.Controls.Add(this.AuthCompleteButton);
+            this.CompletePanel.Enabled = false;
+            this.CompletePanel.Location = new System.Drawing.Point(28, 182);
+            this.CompletePanel.Name = "CompletePanel";
+            this.CompletePanel.Size = new System.Drawing.Size(342, 100);
+            this.CompletePanel.TabIndex = 8;
+            // 
+            // VerifierTextBox
+            // 
+            this.VerifierTextBox.Location = new System.Drawing.Point(136, 21);
+            this.VerifierTextBox.Name = "VerifierTextBox";
+            this.VerifierTextBox.Size = new System.Drawing.Size(100, 20);
+            this.VerifierTextBox.TabIndex = 10;
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(88, 24);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(42, 13);
+            this.label15.TabIndex = 9;
+            this.label15.Text = "Verifier:";
+            // 
+            // AuthCompleteButton
+            // 
+            this.AuthCompleteButton.Location = new System.Drawing.Point(27, 56);
+            this.AuthCompleteButton.Name = "AuthCompleteButton";
+            this.AuthCompleteButton.Size = new System.Drawing.Size(288, 24);
+            this.AuthCompleteButton.TabIndex = 8;
+            this.AuthCompleteButton.Text = "Complete Authentication";
+            this.AuthCompleteButton.Click += new System.EventHandler(this.AuthCompleteButtonClick);
+            // 
             // FConfigure
             // 
             this.AcceptButton = this.BtnOK;
@@ -913,12 +944,20 @@ namespace FlickrNetScreensaver
             this.tabPage5.ResumeLayout(false);
             this.ProxyPanel.ResumeLayout(false);
             this.ProxyPanel.PerformLayout();
+            this.CompletePanel.ResumeLayout(false);
+            this.CompletePanel.PerformLayout();
             this.ResumeLayout(false);
 
 		}
 		#endregion
 
-		private void FConfigure_Load(object sender, System.EventArgs e)
+	    private static OAuthAccessToken Token
+	    {
+	        get { return Settings.Default.AuthenticationToken; }
+	        set { Settings.Default.AuthenticationToken = value; }
+	    }
+
+	    private void FConfigure_Load(object sender, System.EventArgs e)
 		{
             LoadAuth();
 
@@ -976,14 +1015,16 @@ namespace FlickrNetScreensaver
 		private void LoadAuth()
 		{
             Token = Settings.Default.AuthenticationToken;
-			if( Token != null && Token.Length > 0 )
+			if( Token != null && !string.IsNullOrEmpty(Token.Token) )
 			{
+			    AuthButton.Enabled = false;
 				AuthTokenLabel.Visible = true;
 				AuthRemoveButton.Visible = true;
 			}
 			else
 			{
-				AuthTokenLabel.Visible = false;
+                AuthButton.Enabled = true;
+                AuthTokenLabel.Visible = false;
 				AuthRemoveButton.Visible = false;
 			}
 		}
@@ -1135,17 +1176,15 @@ namespace FlickrNetScreensaver
 
 		private bool CheckAuth()
 		{
-			if( Token == null || Token.Length == 0 ) 
+			if( Token == null || string.IsNullOrEmpty(Token.Token) ) 
 			{
 				Settings.Default.AuthenticationToken = null;
                 Settings.Default.Save();
 				return true;
 			}
 
-			Flickr flickr = FlickrFactory.GetInstance();
 			try
 			{
-				Auth auth = flickr.AuthCheckToken(Token);
 				Settings.Default.AuthenticationToken = Token;
                 Settings.Default.Save();
 				return true;
@@ -1269,8 +1308,7 @@ namespace FlickrNetScreensaver
                 List<Photo> photos = new List<Photo>();
 				if( flickr.IsAuthenticated )
 				{
-					Auth auth = flickr.AuthCheckToken(flickr.AuthToken);
-					if( auth.User.UserId == u.UserId )
+					if( Token.UserId == u.UserId )
 					{
 						// show own contacts
 
@@ -1377,22 +1415,17 @@ namespace FlickrNetScreensaver
 			return false;
 		}
 
-		private void BtnCancel_Click(object sender, System.EventArgs e)
+		private void BtnCancelClick(object sender, System.EventArgs e)
 		{
 			Close();
 		}
 
-		private void linkLabel1_LinkClicked(object sender, System.Windows.Forms.LinkLabelLinkClickedEventArgs e)
-		{
-			System.Diagnostics.Process.Start("http://www.flickr.com");
-		}
-
-		private void UserSet_CheckedChanged(object sender, System.EventArgs e)
+	    private void UserSetCheckedChanged(object sender, System.EventArgs e)
 		{
 			UserSetName.Enabled = UserSet.Checked;
 		}
 
-		private void UserTag_CheckedChanged(object sender, System.EventArgs e)
+		private void UserTagCheckedChanged(object sender, System.EventArgs e)
 		{
 			UserTagName.Enabled = UserTag.Checked;
 		}
@@ -1529,13 +1562,16 @@ namespace FlickrNetScreensaver
 			}
 		}
 
+	    private OAuthRequestToken RequestToken;
+
 		private void AuthButtonClick(object sender, EventArgs e)
 		{
 			var f = FlickrFactory.GetInstance();
-			TempFrob = f.AuthGetFrob();
-			var url = f.AuthCalcUrl(TempFrob, AuthLevel.Read);
+		    RequestToken = f.OAuthGetRequestToken("oob");
 
-			AuthCompleteButton.Enabled = true;
+		    var url = f.OAuthCalculateAuthorizationUrl(RequestToken.Token, AuthLevel.Read);
+
+		    CompletePanel.Enabled = true;
 			AuthButton.Enabled = false;
 
 			System.Diagnostics.Process.Start(url);
@@ -1546,8 +1582,8 @@ namespace FlickrNetScreensaver
 			var f = FlickrFactory.GetInstance();
 			try
 			{
-				var auth = f.AuthGetToken(TempFrob);
-				Token = auth.Token;
+				var auth = f.OAuthGetAccessToken(RequestToken, VerifierTextBox.Text);
+				Token = auth;
 			}
 			catch(FlickrException ex)
 			{
@@ -1555,8 +1591,8 @@ namespace FlickrNetScreensaver
 				return;
 			}
 
-			AuthButton.Enabled = true;
-			AuthCompleteButton.Enabled = false;
+			AuthButton.Enabled = false;
+			CompletePanel.Enabled = false;
 			AuthTokenLabel.Visible = true;
 			AuthRemoveButton.Visible = true;
 
@@ -1568,6 +1604,7 @@ namespace FlickrNetScreensaver
 			Token = null;
 
 			MessageBox.Show("Authentication removed!");
+		    AuthButton.Enabled = true;
 			AuthRemoveButton.Visible = false;
 			AuthTokenLabel.Visible = false;
 		}

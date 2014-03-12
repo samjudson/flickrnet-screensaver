@@ -15,14 +15,19 @@ namespace FlickrNetScreensaver
 
 	    public static Flickr GetInstance()
 		{
-		    return GetInstance(!String.IsNullOrEmpty(Settings.Default.AuthenticationToken) ? Settings.Default.AuthenticationToken : null);
+		    return GetInstance(Settings.Default.AuthenticationToken);
 		}
 
-	    public static Flickr GetInstance(string token)
+	    public static Flickr GetInstance(OAuthAccessToken token)
 		{
 			Flickr.CacheTimeout = new TimeSpan(1, 0, 0, 0, 0);
 
-			var f = new Flickr(Key, Secret, token);
+			var f = new Flickr(Key, Secret);
+            if (token != null)
+            {
+                f.OAuthAccessToken = token.Token;
+                f.OAuthAccessTokenSecret = token.TokenSecret;
+            }
 
 			if( Settings.Default.ProxyUse ) f.Proxy = GetProxy();
 			return f;

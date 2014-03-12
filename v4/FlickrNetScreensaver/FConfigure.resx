@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="label8.Text" xml:space="preserve">
+    <value>Click below to Authentication. Once you click the button the Flickr web site will be loaded and you will be asked to authenticate the Flickr Screensaver for read only access. Once you have successfully completed this task then return to this window and click on the Complete button.</value>
+  </data>
   <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>173, 17</value>
   </metadata>
@@ -130,9 +133,9 @@
         TkSuQmCC
 </value>
   </data>
-  <data name="label8.Text" xml:space="preserve">
-    <value>Click below to Authentication. Once you click the button the Flickr web site will be loaded and you will be asked to authenticate the Flickr Screensaver for read only access. Once you have successfully completed this task then return to this window and click on the Complete button.</value>
-  </data>
+  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>173, 17</value>
+  </metadata>
   <metadata name="RecentPhotosImages.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>

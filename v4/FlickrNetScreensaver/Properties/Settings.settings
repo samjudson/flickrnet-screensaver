@@ -26,7 +26,7 @@
     <Setting Name="ProxyDomain" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="AuthenticationToken" Type="System.String" Scope="User">
+    <Setting Name="AuthenticationToken" Type="FlickrNet.OAuthAccessToken" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ShowType" Type="System.String" Scope="User">
