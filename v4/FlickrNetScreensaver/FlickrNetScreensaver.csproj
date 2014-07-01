@@ -61,9 +61,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FlickrNet, Version=3.10.0.0, Culture=neutral, PublicKeyToken=2491df59efa5d132, processorArchitecture=MSIL">
+    <Reference Include="FlickrNet, Version=3.12.0.0, Culture=neutral, PublicKeyToken=2491df59efa5d132, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FlickrNet.3.10.0\lib\net20\FlickrNet.dll</HintPath>
+      <HintPath>..\packages\FlickrNet.3.12.0\lib\net20\FlickrNet.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -154,6 +154,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="App.config" />
+    <None Include="FlickrNet.chm" />
     <None Include="FlickrNetScreensaver.snk" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
