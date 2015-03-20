@@ -62,7 +62,10 @@ namespace FlickrNetScreensaver
 
 		private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
 		{
-			MessageBox.Show("The application has performed an exception. Please report to Sam Judson (sam@wackylabs.net)\r\n" + e.Exception.Message);
+			MessageBox.Show("The application has performed an exception. Please report to Sam Judson (sam@wackylabs.net)" +
+                 "\r\n Exception type: " + e.GetType().ToString() + 
+                "\r\n Exception Message: " + e.Exception.Message + 
+                "\r\n Stack Trace: \r\n" + e.Exception.StackTrace);
 			Application.Exit();
 		}
 

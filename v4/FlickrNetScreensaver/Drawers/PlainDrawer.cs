@@ -70,7 +70,7 @@ namespace FlickrNetScreensaver.Drawers
 
 					textGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 					Font f = new Font("san-serif", 12F);
-					Brush b = Brushes.White;
+					Brush b = Brushes.Yellow;
 
 					textGraphics.DrawString(_text, f, b, 0, img.Height + 5, StringFormat.GenericTypographic);
 
@@ -81,6 +81,7 @@ namespace FlickrNetScreensaver.Drawers
 				img = textImage;
 			}
 
+            /*
 			// If too big for the screen shrink to fit.
 			if( img.Width >= width || img.Height >= height )
 			{
@@ -88,7 +89,7 @@ namespace FlickrNetScreensaver.Drawers
 				if( img.Width > width ) scale = width / (double)img.Width;
 				if( img.Height > height && (scale < (height / (double)img.Height)) ) scale = height / (double)img.Height;
 
-				scale = scale * 0.8;
+				// scale = scale * 0.8;
 
 				Image img2 = new Bitmap((int)(img.Width * scale), (int)(img.Height * scale));
 				using( Graphics g = Graphics.FromImage(img2) )
@@ -99,12 +100,13 @@ namespace FlickrNetScreensaver.Drawers
 				img.Dispose();
 				img = img2;
 			}
+            */
 
 			// Standard post production :)
 			DrawerAssist.FinalImage(ref img, width, height);
 
             DrawImage(img.Width, img.Height, (width - img.Width)/2, (height - img.Height)/2, img);
-		}
+        }
 
         private delegate void DrawImageDelegate(int width, int height, int left, int top, Image img);
 

@@ -18,3 +18,7 @@ The Flickr.Net Screensaver was written using the Flickr.Net API Library.
 For more details check out the Flickr.Net API Library repository.
 
 https://github.com/samjudson/flickr-net
+
+-----------------------------
+
+Latest Updates thanks to Sean Selitrennikoff

@@ -14,6 +14,7 @@ namespace FlickrNetScreensaver
 	/// </summary>
 	public static class ImageManager
 	{
+        public static bool ViewedAllPhotos { get; set; }
         public static int BackupPhotoCount { get; set; }
 
 		// Store the photo in this collection
@@ -30,11 +31,16 @@ namespace FlickrNetScreensaver
 
 		private static int _nextIndex;
         private static int _nextBackupPhoto;
+        public static bool NeedToCleanDirectory { get; set; }
 		private static readonly Random Rand = new Random();
+
+        private static Thread _downloadThread = null;
 
 		static ImageManager()
 		{
             BackupPhotoCount = 5;
+            ViewedAllPhotos = false;
+            NeedToCleanDirectory = true;
             SizeRequired = Settings.Default.DrawerImageSize;
 		}
 
@@ -44,14 +50,31 @@ namespace FlickrNetScreensaver
 		/// <param name="photos"></param>
 		public static void Initialise(List<Photo> photos)
 		{
+            InitialCollection.Clear();
 			InitialCollection.AddRange(photos);
+
+            PhotosToDownload.Clear();
 			PhotosToDownload.AddRange(photos);
+
+            ViewedAllPhotos = false;
 
 			_nextIndex = Rand.Next(0, PhotosToDownload.Count);
 
-            var t = new Thread(InitialiseBackupPhotos);
-            t.Start();
+            BackupPhotoCount = PhotosToDownload.Count;
+
+            _downloadThread = new Thread(InitialiseBackupPhotos);
+            _downloadThread.Start();
 		}
+
+        public static void StopAllThreads()
+        {
+            if (_downloadThread != null)
+            {
+                _downloadThread.Abort();
+                _downloadThread = null;
+            }
+        }
+
 
         public static bool IsNetworkConnection
         {
@@ -65,7 +88,7 @@ namespace FlickrNetScreensaver
         {
             get
             {
-                return _nextBackupPhoto++ % BackupPhotoCount;
+                return _nextBackupPhoto++ % BackupPhotos.Count;
             }
         }
 		public static Photo NextPhoto
@@ -88,8 +111,12 @@ namespace FlickrNetScreensaver
 		{
 			PhotosToDownload.RemoveAt(_nextIndex);
 
-			if( PhotosToDownload.Count == 0 )
-				PhotosToDownload.AddRange(InitialCollection);
+            if (PhotosToDownload.Count == 0)
+            {
+                ViewedAllPhotos = true;
+                PhotosToDownload.Clear();
+                PhotosToDownload.AddRange(InitialCollection);
+            }
 
 			_nextIndex = Rand.Next(0, PhotosToDownload.Count);
 		}
@@ -127,29 +154,53 @@ namespace FlickrNetScreensaver
         private static void InitialiseBackupPhotos()
         {
             var path = CalculateBackupDirectory();
-            if (Directory.Exists(path)) Directory.Delete(path, true);
-            Directory.CreateDirectory(path);
 
-            if (BackupPhotos.Count != 0) return;
+            BackupPhotos.Clear();
+
+            if (NeedToCleanDirectory)
+            {
+                if (Directory.Exists(path))
+                {
+                    Directory.Delete(path, true);
+                }
+
+                Directory.CreateDirectory(path);
+
+                NeedToCleanDirectory = false;
+            }
 
             for (var i = 0; i < BackupPhotoCount; i++)
             {
-                var p = InitialCollection[new Random().Next(0, InitialCollection.Count)];
-
-                Debug.WriteLine("Downloading backup photo " + p.PhotoId);
+                var p = InitialCollection[i];
 
                 var filename = CalculateBackupFilename(p);
 
-                var url = CalcUrl(p);
-
-                using (var client = new WebClient())
+                try
                 {
-                    client.DownloadFile(url, filename);
+                    if (!File.Exists(filename))
+                    {
+                        Debug.WriteLine("Downloading backup photo " + p.PhotoId);
+
+                        var url = CalcUrl(p);
+
+                        using (var client = new WebClient())
+                        {
+                            client.DownloadFile(url, filename);
+                        }
+
+                        Debug.WriteLine("File successfully downloaded to " + filename);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("No need to download backup photo, it already exists in cache: " + p.PhotoId);
+                    }
+
+                    BackupPhotos.Add(p);
                 }
-
-                Debug.WriteLine("File successfully downloaded to " + filename);
-
-                BackupPhotos.Add(p);
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Error downloading a file: " + ex.ToString());
+                }
             }
         }
 
@@ -163,7 +214,7 @@ namespace FlickrNetScreensaver
         private static string CalculateBackupDirectory()
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            path = Path.Combine(path, "BackupFiles");
+            path = Path.Combine(path, "ImageFiles");
             return path;
         }
 

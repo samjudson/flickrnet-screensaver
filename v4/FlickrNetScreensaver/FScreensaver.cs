@@ -1,17 +1,13 @@
 using System;
 using System.Drawing;
-using System.Collections;
 using System.ComponentModel;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data;
-using System.Threading;
-
 using FlickrNet;
 using log4net;
 using FlickrNetScreensaver.Properties;
 using System.Collections.Generic;
 using System.Net;
+using System.Xml;
 
 namespace FlickrNetScreensaver
 {
@@ -39,12 +35,12 @@ namespace FlickrNetScreensaver
 
 	    private readonly Random _random = new Random();
 		private readonly int _screenNumber;
+        private bool _needToCleanBackupDirectory;
 		private System.Windows.Forms.Timer _timerReloadPhotos;
 		private System.Windows.Forms.Timer _timerLoadNextPhoto;
 		Point _mouseXy = Point.Empty;
         private BackgroundWorker _loadNextPhotoWorker;
         private PictureBox _networkErrorIcon;
-		private PictureBox _flickrImage;
 
 		public FScreensaver(int screenNumber)
 		{
@@ -56,6 +52,8 @@ namespace FlickrNetScreensaver
 			Logger.Debug("ScreenNumber: " + screenNumber);
 
 			InitializeComponent();
+
+            _needToCleanBackupDirectory = true;
 
 			_screenNumber = screenNumber;
 
@@ -87,11 +85,9 @@ namespace FlickrNetScreensaver
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FScreensaver));
             this._timerLoadNextPhoto = new System.Windows.Forms.Timer(this.components);
-            this._flickrImage = new System.Windows.Forms.PictureBox();
             this._timerReloadPhotos = new System.Windows.Forms.Timer(this.components);
             this._loadNextPhotoWorker = new System.ComponentModel.BackgroundWorker();
             this._networkErrorIcon = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this._flickrImage)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this._networkErrorIcon)).BeginInit();
             this.SuspendLayout();
             // 
@@ -99,16 +95,7 @@ namespace FlickrNetScreensaver
             // 
             this._timerLoadNextPhoto.Interval = 60000;
             this._timerLoadNextPhoto.Tick += new System.EventHandler(this.TimerLoadNextPhotoTick);
-            // 
-            // flickrImage
-            // 
-            this._flickrImage.Image = ((System.Drawing.Image)(resources.GetObject("flickrImage.Image")));
-            this._flickrImage.Location = new System.Drawing.Point(0, 0);
-            this._flickrImage.Name = "_flickrImage";
-            this._flickrImage.Size = new System.Drawing.Size(90, 30);
-            this._flickrImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this._flickrImage.TabIndex = 1;
-            this._flickrImage.TabStop = false;
+
             // 
             // TimerReloadPhotos
             // 
@@ -138,7 +125,6 @@ namespace FlickrNetScreensaver
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(567, 427);
             this.Controls.Add(this._networkErrorIcon);
-            this.Controls.Add(this._flickrImage);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.KeyPreview = true;
             this.Name = "FScreensaver";
@@ -149,7 +135,6 @@ namespace FlickrNetScreensaver
             this.Closing += new System.ComponentModel.CancelEventHandler(this.FScreensaverClosing);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.FScreensaverKeyPress);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.FScreensaverMouseMove);
-            ((System.ComponentModel.ISupportInitialize)(this._flickrImage)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this._networkErrorIcon)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -185,7 +170,7 @@ namespace FlickrNetScreensaver
 			LoadSettings();
 
 			// Start timer off
-			_timerReloadPhotos.Interval = 1000*60*15; // Reload photos collection every 15 minutes
+			_timerReloadPhotos.Interval = 1000*60*15; // Check if need to reload photos collection every 15 minutes
 			_timerReloadPhotos.Enabled = true;
 
 			_timerLoadNextPhoto.Enabled = true;
@@ -197,71 +182,113 @@ namespace FlickrNetScreensaver
 
         void NetworkChangeNetworkAvailabilityChanged(object sender, System.Net.NetworkInformation.NetworkAvailabilityEventArgs e)
         {
-            _networkErrorIcon.Visible = !e.IsAvailable;
+            bool isVisible = !e.IsAvailable;
+
+            this.BeginInvoke( (MethodInvoker) delegate ()
+            {
+                _networkErrorIcon.Visible = !e.IsAvailable;
+            });
         }
 
 		private void LoadSettings()
 		{
 			try
 			{
-                switch (Settings.Default.ShowType)
-				{
-					case "Everyone":
-						LoadEveryone();
-						break;
-					case "Group":
-						LoadGroup();
-						break;
-					case "User":
-					default:
-						LoadUser();
-						break;
-				}
-			}
-			catch(FlickrException ex)
-			{
-				_timerLoadNextPhoto.Stop();
-				_timerReloadPhotos.Stop();
+                List<PhotoFilter> photoFilters = new List<PhotoFilter>();
 
-				// Unknown error occur - exit gracefully
-				Visible = false;
-				MessageBox.Show("The screensaver has exited as an error occurred (" + ex.Message + ")");
-				Application.Exit();
-				return;
+                if ((Settings.Default.PhotoFilters == null) || (Settings.Default.PhotoFilters.Length < 5))
+                {
+                    return;
+                }
+
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(Settings.Default.PhotoFilters);
+
+                string filterXmlString = "";
+
+                XmlNodeList parentNode = xmlDoc.GetElementsByTagName("PhotoFilter");
+                foreach (XmlNode childrenNode in parentNode)
+                {
+                    filterXmlString = childrenNode.OuterXml;
+                    PhotoFilter photoFilter = new PhotoFilter(filterXmlString);
+                    photoFilters.Add(photoFilter);
+                }
+
+                List<Photo> photos = new List<Photo>();
+
+                foreach (PhotoFilter photoFilter in photoFilters)
+                {
+                    switch (photoFilter.FilterGroupType)
+				    {
+					    case FilterGroupType.Everyone:
+                            photos.AddRange(LoadEveryone(photoFilter));
+                            break;
+                        case FilterGroupType.Group:
+                            photos.AddRange(LoadGroup(photoFilter));
+						    break;
+                        case FilterGroupType.User:
+					    default:
+                            photos.AddRange(LoadUser(photoFilter));
+						    break;
+				    }
+                }
+
+                ImageManager.Initialise(photos);
+			}
+			catch(Exception ex)
+			{
+                if (ImageManager.IsNetworkConnection)
+                {
+/*                    _timerLoadNextPhoto.Stop();
+                    _timerReloadPhotos.Stop();
+
+                    // Unknown error occur - exit gracefully
+                    Visible = false;
+                    MessageBox.Show("The screensaver has exited as an error occurred.  Network connection: " + ImageManager.IsNetworkConnection.ToString() + 
+                        "\r\n Exception type: " + ex.GetType().ToString() + 
+                        "\r\n Error message is: " + ex.Message + 
+                        "\r\n Stack trace is: \r\n " + ex.StackTrace);
+                    Application.Exit();
+                    return;
+                }
+                else
+                {
+*/                    // Transitory network issue?  Try again some time later...
+                }
 			}
 
 			 // Fractions of a minutes
 			_timerLoadNextPhoto.Interval = (int)Math.Round(1000 * 60 * Settings.Default.DrawerDelayTime, 0);
 		}
 
-		private void LoadUser()
+		private List<Photo> LoadUser(PhotoFilter photoFilter)
 		{
-            var userName = Settings.Default.ShowUserUsername;
-			var userType = Settings.Default.ShowUserType;
+            var userName = photoFilter.UserFilter.Username;
+			UserFilterType userType = photoFilter.UserFilter.FilterType;
 			FoundUser u;
-            var photos = new List<Photo>();
+            List<Photo> photos = new List<Photo>();
             const PhotoSearchExtras extras = PhotoSearchExtras.OwnerName | PhotoSearchExtras.AllUrls;
 
 			switch(userType)
 			{
-				case "Set":
-                    var photosetCollection = _flickr.PhotosetsGetPhotos(Settings.Default.ShowUserSetId, extras, 1, 500);
+				case UserFilterType.Set:
+                    var photosetCollection = _flickr.PhotosetsGetPhotos(photoFilter.UserFilter.SetId, extras, 1, 500);
                     photos.AddRange(photosetCollection);
                     if (photosetCollection.Total > 500)
                     {
-                        photosetCollection = _flickr.PhotosetsGetPhotos(Settings.Default.ShowUserSetId, extras, 2, 500);
+                        photosetCollection = _flickr.PhotosetsGetPhotos(photoFilter.UserFilter.SetId, extras, 2, 500);
                         photos.AddRange(photosetCollection);
                     }
 					break;
-				case "Tag":
+                case UserFilterType.Tags:
 					u = _flickr.PeopleFindByUserName(userName);
-                    var tags = Settings.Default.ShowUserTag;
+                    var tags = photoFilter.UserFilter.FilterDetails;
                     var o = new PhotoSearchOptions
                                 {
                                     UserId = u.UserId,
                                     ContentType = ContentTypeSearch.PhotosOnly,
                                     Tags = tags,
-                                    TagMode = TagMode.AllTags,
+                                    TagMode = TagMode.AnyTag,
                                     Extras = extras,
                                     PerPage = 500
                                 };
@@ -274,7 +301,7 @@ namespace FlickrNetScreensaver
                         photos.AddRange(tagCollection);
                     }
 					break;
-				case "Fav":
+                case UserFilterType.Favorite:
 					u = _flickr.PeopleFindByUserName(userName);
                     var favCollection = _flickr.FavoritesGetPublicList(u.UserId, DateTime.MinValue, DateTime.MinValue, extras, 1, 500);
                     photos.AddRange(favCollection);
@@ -284,7 +311,7 @@ namespace FlickrNetScreensaver
                         photos.AddRange(favCollection);
                     }
 					break;
-				case "Contacts":
+                case UserFilterType.Contacts:
                     u = _flickr.PeopleFindByUserName(userName);
                     if (Settings.Default.ShowUserContact == "Own")
                     {
@@ -303,18 +330,18 @@ namespace FlickrNetScreensaver
                         photos.AddRange(_flickr.PhotosGetContactsPublicPhotos(u.UserId, extras));
                     }
 					break;
-				case "All":
+                case UserFilterType.All:
 				default:
 					u = _flickr.PeopleFindByUserName(userName);
                     photos.AddRange(_flickr.PeopleGetPublicPhotos(u.UserId, 1, 200, SafetyLevel.None, extras));
 					break;
 			}
-            ImageManager.Initialise(photos);
+            return photos;
         }
 
-		private void LoadGroup()
+		private List<Photo> LoadGroup(PhotoFilter photoFilter)
 		{
-			var groupid = _flickr.UrlsLookupGroup("http://www.flickr.com/groups/" + Settings.Default.ShowGroupName);
+			var groupid = _flickr.UrlsLookupGroup("http://www.flickr.com/groups/" + photoFilter.GroupFilter.GroupName);
             var photos = new List<Photo>();
             const PhotoSearchExtras extras = PhotoSearchExtras.OwnerName | PhotoSearchExtras.AllUrls;
             var photoCollection = _flickr.GroupsPoolsGetPhotos(groupid, null, null, extras, 1, 500);
@@ -327,14 +354,14 @@ namespace FlickrNetScreensaver
                 photos.AddRange(photoCollection);
             }
 
-			ImageManager.Initialise(photos);
+            return photos;
 		}
 
-		private void LoadEveryone()
+		private IEnumerable<Photo> LoadEveryone(PhotoFilter photoFilter)
 		{
             var photos = new List<Photo>();
 
-            if (Settings.Default.ShowEveryoneType == "Recent")
+            if (photoFilter.EveryoneFilter.filter == EveryoneFilter.EveryoneFilterType.Recent)
             {
                 const PhotoSearchExtras extras = PhotoSearchExtras.OwnerName | PhotoSearchExtras.AllUrls;
                 var photoCollection = _flickr.PhotosGetRecent(1, 500, extras);
@@ -344,11 +371,11 @@ namespace FlickrNetScreensaver
             }
             else
             {
-                if (Settings.Default.ShowEveryoneTagInteresting)
+                if (photoFilter.EveryoneFilter.sortByInterestingness)
                 {
                     var o = new PhotoSearchOptions
                                 {
-                                    Tags = Settings.Default.ShowEveryoneTag,
+                                    Tags = photoFilter.EveryoneFilter.tags,
                                     TagMode = TagMode.AllTags,
                                     PerPage = 50,
                                     SortOrder =
@@ -366,17 +393,16 @@ namespace FlickrNetScreensaver
                 {
                     var o = new PhotoSearchOptions
                                 {
-                                    Tags = Settings.Default.ShowEveryoneTag,
+                                    Tags = photoFilter.EveryoneFilter.tags,
                                     TagMode = TagMode.AllTags,
                                     PerPage = 500
                                 };
                     o.Extras |= PhotoSearchExtras.OwnerName | PhotoSearchExtras.AllUrls;
                     photos.AddRange(_flickr.PhotosSearch(o));
                 }
-
-                ImageManager.Initialise(photos);
-
             }
+
+            return photos;
 		}
 
 	    public bool SuspendMouseMove { get; set; }
@@ -386,10 +412,12 @@ namespace FlickrNetScreensaver
             CheckMouseMovement(sender, e.X, e.Y);
         }
 
-        [System.Diagnostics.Conditional("RELEASE")]
         private void CheckMouseMovement(object sender, int x, int y)
         {
-			if( sender != this )
+
+#if DEBUG
+#else
+            if( sender != this )
 			{
 				var p2 = ((Control)sender).PointToScreen(new Point(x, y));
 				var p = PointToClient(p2);
@@ -405,7 +433,8 @@ namespace FlickrNetScreensaver
 				}
 			}
 			_mouseXy = new Point(x, y);
-		}
+#endif
+        }
 
 		private void TimerLoadNextPhotoTick(object sender, EventArgs e)
 		{
@@ -420,68 +449,84 @@ namespace FlickrNetScreensaver
 
             if (_loadNextPhotoWorker.IsBusy) return;
 
-			_timerLoadNextPhoto.Stop();
+            _timerLoadNextPhoto.Stop();
 
             _loadNextPhotoWorker.RunWorkerAsync();
 
 			Logger.Debug("Starting next photo - Exit");
 		}
 
-		private void MoveFlickrImage()
-		{
-            Logger.Debug("MoveFlickrImage");
-
-			if( _flickrImage.Top == 0 && _flickrImage.Left == 0 )
-			{
-				_flickrImage.Left = Width - _flickrImage.Width;
-			}
-			else if( _flickrImage.Top == 0 && _flickrImage.Left != 0 )
-			{
-				_flickrImage.Top = Height - _flickrImage.Height;
-			}
-			else if( _flickrImage.Top != 0 && _flickrImage.Left != 0 )
-			{
-				_flickrImage.Left = 0;
-			}
-			else if( _flickrImage.Top != 0 && _flickrImage.Left == 0 )
-			{
-				_flickrImage.Top = 0;
-			}
-
-			Refresh();
-		}
-
-        private void DoLoadNextPhoto()
+        private Image LoadImageWithoutLock(Uri url)
         {
-            Logger.Debug("DoLoadNextPhoto - Enter");
+            if (url.IsFile)
+            {
+                var ms = new System.IO.MemoryStream(System.IO.File.ReadAllBytes(url.LocalPath)); // Don't use using!!
+                return Image.FromStream(ms);
+            }
 
-            var p = ImageManager.NextPhoto;
-            var url = ImageManager.CalcUrl(p);
-
-            AddToPreviousPhotosQueue(p);
-
-            Image img;
             using (var client = new WebClient())
             {
                 try
                 {
-                    img = Image.FromStream(client.OpenRead(url));
+                    return Image.FromStream(client.OpenRead(url));
                 }
                 catch (FlickrException ex)
                 {
                     Visible = false;
                     MessageBox.Show("The screensaver has exited as an error occurred (" + ex.Message + ")");
                     Application.Exit();
-                    return;
+                    return null;
                 }
+            }
+        }
+
+	    private void DoLoadNextPhoto()
+        {
+            Logger.Debug("DoLoadNextPhoto - Enter");
+
+            Image img;
+            Photo p;
+
+            lock (_timerReloadPhotos)
+            {
+
+                p = ImageManager.NextPhoto;
+                var url = ImageManager.CalcUrl(p);
+
+                AddToPreviousPhotosQueue(p);
+
+                img = LoadImageWithoutLock(url);
             }
 
             _drawer.ChangeImage(img, p);
+
+            Logger.Debug("DoLoadNextPhoto - Exit");
         }
 
 		private void TimerReloadPhotosTick(object sender, EventArgs e)
 		{
-			//LoadSettings();
+            lock (_timerReloadPhotos)
+            {
+                Logger.Debug("TimerReloadPhotos - Enter");
+
+                if (ImageManager.ViewedAllPhotos)
+                {
+                    // Clean the backup image directory every other day
+                    if ((DateTime.Today.Day % 2 == 0) &&  _needToCleanBackupDirectory)
+                    {
+                        ImageManager.NeedToCleanDirectory = true;
+                        _needToCleanBackupDirectory = false;
+                    }
+                    else if ((DateTime.Today.Day % 2 == 1) && !_needToCleanBackupDirectory)
+                    {
+                        _needToCleanBackupDirectory = true;
+                    }
+
+                    LoadSettings();
+                }
+
+                Logger.Debug("TimerReloadPhotos - Exit");
+            }
 		}
 
 		private void FScreensaverKeyPress(object sender, KeyPressEventArgs e)
@@ -509,6 +554,7 @@ namespace FlickrNetScreensaver
 			try
 			{
                 if (_loadNextPhotoWorker.IsBusy) _loadNextPhotoWorker.CancelAsync();
+                ImageManager.StopAllThreads();
 			}
 			catch
 			{
@@ -542,8 +588,7 @@ namespace FlickrNetScreensaver
 
         private void LoadNextPhotoWorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if (_random.Next(0, 2) == 0) MoveFlickrImage();
-
+            Logger.Debug("Restarting photo timer...");
             _timerLoadNextPhoto.Start();
         }
 

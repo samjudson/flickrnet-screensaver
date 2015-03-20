@@ -8,6 +8,7 @@ using FlickrNet;
 using FlickrNetScreensaver.Properties;
 using System.Collections.Generic;
 using System.Net;
+using System.Xml;
 
 namespace FlickrNetScreensaver
 {
@@ -87,6 +88,11 @@ namespace FlickrNetScreensaver
         private Panel CompletePanel;
         private TextBox VerifierTextBox;
         private Label label15;
+        private Button MoveUpButton;
+        private ListBox FiltersListBox;
+        private Button AddFilter;
+        private Button DeleteButton;
+        private Button MoveDownButton;
         private Button AuthCompleteButton;
 
 		public FConfigure()
@@ -129,6 +135,11 @@ namespace FlickrNetScreensaver
             this.BtnCancel = new System.Windows.Forms.Button();
             this.TabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.DeleteButton = new System.Windows.Forms.Button();
+            this.MoveDownButton = new System.Windows.Forms.Button();
+            this.MoveUpButton = new System.Windows.Forms.Button();
+            this.FiltersListBox = new System.Windows.Forms.ListBox();
+            this.AddFilter = new System.Windows.Forms.Button();
             this.GroupWhat = new System.Windows.Forms.GroupBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -215,7 +226,7 @@ namespace FlickrNetScreensaver
             this.BtnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.BtnOK.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.BtnOK.Location = new System.Drawing.Point(240, 432);
+            this.BtnOK.Location = new System.Drawing.Point(240, 658);
             this.BtnOK.Name = "BtnOK";
             this.BtnOK.Size = new System.Drawing.Size(72, 24);
             this.BtnOK.TabIndex = 1;
@@ -227,7 +238,7 @@ namespace FlickrNetScreensaver
             this.BtnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.BtnCancel.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.BtnCancel.Location = new System.Drawing.Point(320, 432);
+            this.BtnCancel.Location = new System.Drawing.Point(320, 658);
             this.BtnCancel.Name = "BtnCancel";
             this.BtnCancel.Size = new System.Drawing.Size(72, 24);
             this.BtnCancel.TabIndex = 2;
@@ -246,12 +257,17 @@ namespace FlickrNetScreensaver
             this.TabControl.Location = new System.Drawing.Point(0, 8);
             this.TabControl.Name = "TabControl";
             this.TabControl.SelectedIndex = 0;
-            this.TabControl.Size = new System.Drawing.Size(400, 416);
+            this.TabControl.Size = new System.Drawing.Size(400, 644);
             this.TabControl.TabIndex = 11;
             this.TabControl.SelectedIndexChanged += new System.EventHandler(this.TabControl_SelectedIndexChanged);
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.DeleteButton);
+            this.tabPage1.Controls.Add(this.MoveDownButton);
+            this.tabPage1.Controls.Add(this.MoveUpButton);
+            this.tabPage1.Controls.Add(this.FiltersListBox);
+            this.tabPage1.Controls.Add(this.AddFilter);
             this.tabPage1.Controls.Add(this.GroupWhat);
             this.tabPage1.Controls.Add(this.EveryoneWhat);
             this.tabPage1.Controls.Add(this.UserWhat);
@@ -261,9 +277,61 @@ namespace FlickrNetScreensaver
             this.tabPage1.Controls.Add(this.EveryoneWarning);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Size = new System.Drawing.Size(392, 390);
+            this.tabPage1.Size = new System.Drawing.Size(392, 618);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Pictures";
+            // 
+            // DeleteButton
+            // 
+            this.DeleteButton.BackgroundImage = global::FlickrNetScreensaver.Properties.Resources.DeleteRed;
+            this.DeleteButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.DeleteButton.Location = new System.Drawing.Point(337, 553);
+            this.DeleteButton.Name = "DeleteButton";
+            this.DeleteButton.Size = new System.Drawing.Size(39, 43);
+            this.DeleteButton.TabIndex = 23;
+            this.DeleteButton.UseVisualStyleBackColor = true;
+            this.DeleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
+            // 
+            // MoveDownButton
+            // 
+            this.MoveDownButton.BackgroundImage = global::FlickrNetScreensaver.Properties.Resources.DownArrow;
+            this.MoveDownButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.MoveDownButton.Location = new System.Drawing.Point(337, 485);
+            this.MoveDownButton.Name = "MoveDownButton";
+            this.MoveDownButton.Size = new System.Drawing.Size(39, 43);
+            this.MoveDownButton.TabIndex = 22;
+            this.MoveDownButton.UseVisualStyleBackColor = true;
+            this.MoveDownButton.Click += new System.EventHandler(this.MoveDownButton_Click);
+            // 
+            // MoveUpButton
+            // 
+            this.MoveUpButton.BackgroundImage = global::FlickrNetScreensaver.Properties.Resources.UpArrow;
+            this.MoveUpButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.MoveUpButton.Location = new System.Drawing.Point(337, 436);
+            this.MoveUpButton.Name = "MoveUpButton";
+            this.MoveUpButton.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.MoveUpButton.Size = new System.Drawing.Size(39, 43);
+            this.MoveUpButton.TabIndex = 21;
+            this.MoveUpButton.UseVisualStyleBackColor = true;
+            this.MoveUpButton.Click += new System.EventHandler(this.MoveUpButton_Click);
+            // 
+            // FiltersListBox
+            // 
+            this.FiltersListBox.FormattingEnabled = true;
+            this.FiltersListBox.Location = new System.Drawing.Point(16, 436);
+            this.FiltersListBox.Name = "FiltersListBox";
+            this.FiltersListBox.Size = new System.Drawing.Size(315, 160);
+            this.FiltersListBox.TabIndex = 20;
+            // 
+            // AddFilter
+            // 
+            this.AddFilter.Location = new System.Drawing.Point(16, 380);
+            this.AddFilter.Name = "AddFilter";
+            this.AddFilter.Size = new System.Drawing.Size(144, 36);
+            this.AddFilter.TabIndex = 19;
+            this.AddFilter.Text = "Add Photos";
+            this.AddFilter.UseVisualStyleBackColor = true;
+            this.AddFilter.Click += new System.EventHandler(this.AddFilter_Click);
             // 
             // GroupWhat
             // 
@@ -318,7 +386,7 @@ namespace FlickrNetScreensaver
             this.EveryoneWhat.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.EveryoneWhat.Location = new System.Drawing.Point(16, 296);
             this.EveryoneWhat.Name = "EveryoneWhat";
-            this.EveryoneWhat.Size = new System.Drawing.Size(360, 80);
+            this.EveryoneWhat.Size = new System.Drawing.Size(360, 77);
             this.EveryoneWhat.TabIndex = 10;
             this.EveryoneWhat.TabStop = false;
             // 
@@ -522,7 +590,7 @@ namespace FlickrNetScreensaver
             this.tabPage2.Controls.Add(this.label7);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(392, 390);
+            this.tabPage2.Size = new System.Drawing.Size(392, 618);
             this.tabPage2.TabIndex = 2;
             this.tabPage2.Text = "Options";
             // 
@@ -536,7 +604,7 @@ namespace FlickrNetScreensaver
             // 
             // label1
             // 
-            this.label1.Location = new System.Drawing.Point(16, 80);
+            this.label1.Location = new System.Drawing.Point(42, 80);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(96, 16);
             this.label1.TabIndex = 20;
@@ -561,7 +629,7 @@ namespace FlickrNetScreensaver
             // label5
             // 
             this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label5.Location = new System.Drawing.Point(16, 16);
+            this.label5.Location = new System.Drawing.Point(16, 19);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(128, 16);
             this.label5.TabIndex = 13;
@@ -570,7 +638,7 @@ namespace FlickrNetScreensaver
             // label6
             // 
             this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label6.Location = new System.Drawing.Point(208, 16);
+            this.label6.Location = new System.Drawing.Point(206, 21);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(56, 16);
             this.label6.TabIndex = 1;
@@ -585,7 +653,7 @@ namespace FlickrNetScreensaver
             0,
             0,
             131072});
-            this.DelayTime.Location = new System.Drawing.Point(144, 16);
+            this.DelayTime.Location = new System.Drawing.Point(144, 17);
             this.DelayTime.Maximum = new decimal(new int[] {
             60,
             0,
@@ -615,15 +683,15 @@ namespace FlickrNetScreensaver
             "Large"});
             this.ImageSize.Location = new System.Drawing.Point(144, 48);
             this.ImageSize.Name = "ImageSize";
-            this.ImageSize.Size = new System.Drawing.Size(88, 21);
+            this.ImageSize.Size = new System.Drawing.Size(104, 21);
             this.ImageSize.TabIndex = 17;
             // 
             // label7
             // 
             this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label7.Location = new System.Drawing.Point(16, 48);
+            this.label7.Location = new System.Drawing.Point(67, 48);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(128, 16);
+            this.label7.Size = new System.Drawing.Size(71, 16);
             this.label7.TabIndex = 16;
             this.label7.Text = "Image Size:";
             // 
@@ -637,7 +705,7 @@ namespace FlickrNetScreensaver
             this.tabPage4.Controls.Add(this.CompletePanel);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(392, 390);
+            this.tabPage4.Size = new System.Drawing.Size(392, 618);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Authentication";
             // 
@@ -693,7 +761,7 @@ namespace FlickrNetScreensaver
             this.tabPage3.Controls.Add(this.label10);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(392, 390);
+            this.tabPage3.Size = new System.Drawing.Size(392, 618);
             this.tabPage3.TabIndex = 4;
             this.tabPage3.Text = "Recent Photos";
             // 
@@ -719,7 +787,7 @@ namespace FlickrNetScreensaver
             this.RecentPhotosList.LargeImageList = this.RecentPhotosImages;
             this.RecentPhotosList.Location = new System.Drawing.Point(0, 0);
             this.RecentPhotosList.Name = "RecentPhotosList";
-            this.RecentPhotosList.Size = new System.Drawing.Size(392, 366);
+            this.RecentPhotosList.Size = new System.Drawing.Size(392, 594);
             this.RecentPhotosList.SmallImageList = this.RecentPhotosImages;
             this.RecentPhotosList.TabIndex = 0;
             this.RecentPhotosList.UseCompatibleStateImageBehavior = false;
@@ -747,7 +815,7 @@ namespace FlickrNetScreensaver
             // label10
             // 
             this.label10.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.label10.Location = new System.Drawing.Point(0, 366);
+            this.label10.Location = new System.Drawing.Point(0, 594);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(392, 24);
             this.label10.TabIndex = 1;
@@ -760,7 +828,7 @@ namespace FlickrNetScreensaver
             this.tabPage5.Controls.Add(this.ProxyDefined);
             this.tabPage5.Location = new System.Drawing.Point(4, 22);
             this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Size = new System.Drawing.Size(392, 390);
+            this.tabPage5.Size = new System.Drawing.Size(392, 618);
             this.tabPage5.TabIndex = 5;
             this.tabPage5.Text = "Proxy";
             // 
@@ -870,7 +938,7 @@ namespace FlickrNetScreensaver
             // 
             this.AboutButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AboutButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.AboutButton.Location = new System.Drawing.Point(8, 432);
+            this.AboutButton.Location = new System.Drawing.Point(8, 658);
             this.AboutButton.Name = "AboutButton";
             this.AboutButton.Size = new System.Drawing.Size(56, 24);
             this.AboutButton.TabIndex = 18;
@@ -918,7 +986,7 @@ namespace FlickrNetScreensaver
             this.AcceptButton = this.BtnOK;
             this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
             this.CancelButton = this.BtnCancel;
-            this.ClientSize = new System.Drawing.Size(402, 464);
+            this.ClientSize = new System.Drawing.Size(402, 690);
             this.Controls.Add(this.AboutButton);
             this.Controls.Add(this.TabControl);
             this.Controls.Add(this.BtnCancel);
@@ -976,6 +1044,8 @@ namespace FlickrNetScreensaver
 			}
 
 			LoadProxy();
+
+            LoadFilterListBox();
 
             DelayTime.Value = Settings.Default.DrawerDelayTime;
             FillScreen.Checked = Settings.Default.DrawerFillScreen;
@@ -1082,46 +1152,53 @@ namespace FlickrNetScreensaver
 			}
 		}
 
+        private void LoadFilterListBox()
+        {
+            if ((Settings.Default.PhotoFilters == null) || (Settings.Default.PhotoFilters.Length < 5))
+            {
+                return;
+            }
+
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(Settings.Default.PhotoFilters);
+
+            string filterXmlString = "";
+
+            XmlNodeList parentNode = xmlDoc.GetElementsByTagName("PhotoFilter");
+            foreach (XmlNode childrenNode in parentNode)
+            {
+                filterXmlString = childrenNode.OuterXml;
+                PhotoFilter photoFilter = new PhotoFilter(filterXmlString);
+                FiltersListBox.Items.Add(photoFilter);
+            }
+        }
+
 		private void BtnOK_Click(object sender, System.EventArgs e)
 		{
-			if( !CheckProxy() ) return;
-
-            Settings.Default.Save();
-
-			if( !CheckAuth() ) return;
-
-			try
-			{
-				if( SelectUser.Checked )
-				{
-					if( !CheckUsername() ) return;
-				}
-				if( SelectGroup.Checked )
-				{
-					if( !CheckGroup() ) return;
-				}
-				if( SelectEveryone.Checked )
-				{
-					if( !CheckEveryone() ) return;
-				}
-			}
-			catch(FlickrException ex)
-			{
-				DialogResult res = MessageBox.Show("A problem occurred with Flickr and your settings could not be verified (" + ex.Message + ")\r\nDo you wish to save your settings anyway?", "Problem saving settings", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-				if( res == DialogResult.No ) return;
-			}
-			catch(System.Net.WebException ex)
-			{
-				DialogResult res = MessageBox.Show("A problem occurred with Flickr and your settings could not be verified (" + ex.Message + ")\r\nDo you wish to save your settings anyway?", "Problem saving settings", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-				if( res == DialogResult.No ) return;
+            if (FiltersListBox.Items.Count < 1)
+            {
+				DialogResult res = MessageBox.Show("You must add at least one filter :)", "Problem with photo list!", MessageBoxButtons.OK);
+                return;
 			}
 
+            // Capture the photo filter list into Settings
+            string str = "<PhotoFilters>";
+
+            foreach (PhotoFilter filter in FiltersListBox.Items)
+            {
+                str = str + filter.ToXml();
+            }
+            
+            str = str + "</PhotoFilters>";
+            
+            Settings.Default.PhotoFilters = str;
+            
             Settings.Default.DrawerDelayTime = DelayTime.Value;
 			Settings.Default.DrawerImageSize = ImageSize.SelectedItem.ToString();
             Settings.Default.DrawerFillScreen = FillScreen.Checked;
 
 			Settings.Default.Drawer = Drawer.SelectedItem.ToString();
-			DrawOptions.AbstractOptions options = (DrawOptions.AbstractOptions)panel1.Controls[0];
+			var options = (DrawOptions.AbstractOptions)panel1.Controls[0];
 			options.SaveSettings();
 
             Settings.Default.Save();
@@ -1139,19 +1216,16 @@ namespace FlickrNetScreensaver
 				return true;
 			}
 
-			System.Net.WebProxy proxy = new System.Net.WebProxy();
-			proxy.Address = new Uri("http://" + ProxyIPAddress.Text + ":" + ProxyPort.Text);
+			var proxy = new WebProxy {Address = new Uri("http://" + ProxyIPAddress.Text + ":" + ProxyPort.Text)};
 
-			if( ProxyUsername.Text.Length > 0 )
+		    if( ProxyUsername.Text.Length > 0 )
 			{
-				System.Net.NetworkCredential creds = new System.Net.NetworkCredential();
-				creds.UserName = ProxyUsername.Text;
-				creds.Password = ProxyPassword.Text;
-				if( ProxyDomain.Text.Length > 0 ) creds.Domain = ProxyDomain.Text;
+				var creds = new NetworkCredential {UserName = ProxyUsername.Text, Password = ProxyPassword.Text};
+			    if( ProxyDomain.Text.Length > 0 ) creds.Domain = ProxyDomain.Text;
 				proxy.Credentials = creds;
 			}
 
-			System.Net.HttpWebRequest req = (System.Net.HttpWebRequest)System.Net.HttpWebRequest.Create("http://www.flickr.com");
+			var req = (HttpWebRequest)WebRequest.Create("http://www.flickr.com");
 			try
 			{
 				req.Proxy = proxy;
@@ -1198,7 +1272,7 @@ namespace FlickrNetScreensaver
 
 		private bool CheckUsername()
 		{
-			Flickr flickr = FlickrFactory.GetInstance();
+			var flickr = FlickrFactory.GetInstance();
 
 			FoundUser u = null;
 
@@ -1209,18 +1283,15 @@ namespace FlickrNetScreensaver
 			}
 			catch(FlickrApiException ex)
 			{
-				if( ex.Code == 1 )
+			    if( ex.Code == 1 )
 				{
 					MessageBox.Show("Unable to find user: " + ex.Message);
 					return false;
 				}
-				else
-				{
-					throw ex;
-				}
+			    throw;
 			}
 
-			// Check tag or set.
+		    // Check tag or set.
 
 			if( UserAll.Checked )
 			{
@@ -1240,16 +1311,15 @@ namespace FlickrNetScreensaver
 					return false;
 				}
 
-				bool bFound = false;
-				foreach(Photoset pset in psets)
+				var bFound = false;
+				foreach(var pset in psets)
 				{
-					if( pset.Title == UserSetName.Text )
-					{
-						bFound = true;
-                        Settings.Default.ShowUserSet = UserSetName.Text;
-                        Settings.Default.ShowUserSetId = pset.PhotosetId.ToString();
-						break;
-					}
+				    if (pset.Title != UserSetName.Text) continue;
+
+				    bFound = true;
+				    Settings.Default.ShowUserSet = UserSetName.Text;
+				    Settings.Default.ShowUserSetId = pset.PhotosetId;
+				    break;
 				}
 				if( !bFound )
 				{
@@ -1267,12 +1337,9 @@ namespace FlickrNetScreensaver
 			if( UserTag.Checked )
 			{
 
-				PhotoSearchOptions o = new PhotoSearchOptions();
-				o.UserId = u.UserId;
-				o.Tags = UserTagName.Text;
-				o.PerPage = 1;
+				var o = new PhotoSearchOptions {UserId = u.UserId, Tags = UserTagName.Text, PerPage = 1};
 
-				PhotoCollection taggedPhotos = flickr.PhotosSearch(o);
+			    var taggedPhotos = flickr.PhotosSearch(o);
 				if( taggedPhotos.Total < 10 )
 				{
 					MessageBox.Show("Unable to find the tag/s in the users photos.");
@@ -1289,7 +1356,7 @@ namespace FlickrNetScreensaver
 
 			if( UserFav.Checked ) 
 			{
-                PhotoCollection photos = flickr.FavoritesGetPublicList(u.UserId);
+                var photos = flickr.FavoritesGetPublicList(u.UserId);
 				if( photos.Total == 0 )
 				{
 					MessageBox.Show("This user does not have any public favorites");
@@ -1305,7 +1372,7 @@ namespace FlickrNetScreensaver
 
 			if( UserContacts.Checked ) 
 			{
-                List<Photo> photos = new List<Photo>();
+                var photos = new List<Photo>();
 				if( flickr.IsAuthenticated )
 				{
 					if( Token.UserId == u.UserId )
@@ -1351,13 +1418,62 @@ namespace FlickrNetScreensaver
 
 		}
 
+        private PhotoFilter CreatePhotoFilterForUser()
+        {
+            var filter = new PhotoFilter
+                         {
+                             FilterGroupType = FilterGroupType.User,
+                             UserFilter = new UserFilter {Username = Settings.Default.ShowUserUsername}
+                         };
+
+            if (Settings.Default.ShowUserType.Equals("All"))
+            {
+                filter.UserFilter.FilterType = UserFilterType.All;
+                filter.UserFilter.FilterDetails = "";
+                filter.UserFilter.SetId = "";
+                return filter;
+            }
+
+            if (Settings.Default.ShowUserType.Equals("Set"))
+            {
+                filter.UserFilter.FilterType = UserFilterType.Set;
+                filter.UserFilter.FilterDetails = Settings.Default.ShowUserSet;
+                filter.UserFilter.SetId = Settings.Default.ShowUserSetId;
+                return filter;
+            }
+
+            if (Settings.Default.ShowUserType.Equals("Tag"))
+            {
+                filter.UserFilter.FilterType = UserFilterType.Tags;
+                filter.UserFilter.FilterDetails = Settings.Default.ShowUserTag;
+                filter.UserFilter.SetId = "";
+                return filter;
+            }
+
+            if (Settings.Default.ShowUserType.Equals("Fav"))
+            {
+                filter.UserFilter.FilterType = UserFilterType.Favorite;
+                filter.UserFilter.FilterDetails = "";
+                filter.UserFilter.SetId = "";
+                return filter;
+            }
+
+
+            // Contacts
+
+            filter.UserFilter.FilterType = UserFilterType.Contacts;
+            filter.UserFilter.FilterDetails = "";
+            filter.UserFilter.SetId = "";
+            return filter;
+        }
+
 		private bool CheckGroup()
 		{
-			Flickr flickr = FlickrFactory.GetInstance();
+			var flickr = FlickrFactory.GetInstance();
 			
 			try
 			{
-				string groupId = flickr.UrlsLookupGroup("http://www.flickr.com/groups/" + GroupName.Text);
+				var groupId = flickr.UrlsLookupGroup("http://www.flickr.com/groups/" + GroupName.Text);
 
 				if( groupId != null )
 				{
@@ -1366,11 +1482,9 @@ namespace FlickrNetScreensaver
 
 					return true;
 				}
-				else
-				{
-					MessageBox.Show("Unable to find group - please enter end of the url");
-					return false;
-				}
+
+			    MessageBox.Show("Unable to find group - please enter end of the url");
+			    return false;
 			}
 			catch(FlickrException ex)
 			{
@@ -1378,6 +1492,17 @@ namespace FlickrNetScreensaver
 				return false;
 			}
 		}
+
+        private PhotoFilter CreatePhotoFilterForGroup()
+        {
+            var filter = new PhotoFilter
+                                 {
+                                     FilterGroupType = FilterGroupType.Group,
+                                     GroupFilter = new GroupFilter {GroupName = Settings.Default.ShowGroupName}
+                                 };
+
+            return filter;
+        }
 
 		private bool CheckEveryone()
 		{
@@ -1391,29 +1516,47 @@ namespace FlickrNetScreensaver
 				return true;
 			}
 
-			if( EveryoneTag.Checked )
-			{
-                PhotoSearchOptions o = new PhotoSearchOptions();
-                o.Tags = EveryoneTagText.Text;
-                o.PerPage = 500;
+		    if (!EveryoneTag.Checked) return false;
 
-				PhotoCollection photos = flickr.PhotosSearch(o);
-				if( photos.Total == 0 )
-				{
-					MessageBox.Show("The tags did not return any photographs. Please check the tag you entered");
-					return false;
-				}
+		    var o = new PhotoSearchOptions {Tags = EveryoneTagText.Text, PerPage = 500};
 
-                Settings.Default.ShowType = "Everyone";
-                Settings.Default.ShowEveryoneType = "Tag";
-                Settings.Default.ShowEveryoneTag = EveryoneTagText.Text;
-                Settings.Default.ShowEveryoneTagInteresting = EveryoneTagInteresting.Checked;
+		    var photos = flickr.PhotosSearch(o);
+		    if( photos.Total == 0 )
+		    {
+		        MessageBox.Show("The tags did not return any photographs. Please check the tag you entered");
+		        return false;
+		    }
 
-				return true;
-			}
+		    Settings.Default.ShowType = "Everyone";
+		    Settings.Default.ShowEveryoneType = "Tag";
+		    Settings.Default.ShowEveryoneTag = EveryoneTagText.Text;
+		    Settings.Default.ShowEveryoneTagInteresting = EveryoneTagInteresting.Checked;
 
-			return false;
+		    return true;
 		}
+
+        private PhotoFilter CreatePhotoFilterForEveryone()
+        {
+            var filter = new PhotoFilter
+                         {
+                             FilterGroupType = FilterGroupType.Everyone,
+                             EveryoneFilter = new EveryoneFilter()
+                         };
+
+            if (Settings.Default.ShowEveryoneType.Equals("Recent"))
+            {
+                filter.EveryoneFilter.filter = EveryoneFilter.EveryoneFilterType.Recent;
+                filter.EveryoneFilter.sortByInterestingness = false;
+                filter.EveryoneFilter.tags = "";
+                return filter;
+            }
+
+            // Tags
+            filter.EveryoneFilter.filter = EveryoneFilter.EveryoneFilterType.Tags;
+            filter.EveryoneFilter.sortByInterestingness = Settings.Default.ShowEveryoneTagInteresting;
+            filter.EveryoneFilter.tags = Settings.Default.ShowEveryoneTag;
+            return filter;
+        }
 
 		private void BtnCancelClick(object sender, System.EventArgs e)
 		{
@@ -1471,68 +1614,59 @@ namespace FlickrNetScreensaver
 				RefreshRecentPhotos();
 		}
 
-		bool refreshRunning = false;
+		bool _refreshRunning;
 		private void RefreshRecentPhotos()
 		{
-			if( refreshRunning ) return;
+			if( _refreshRunning ) return;
 		
-			refreshRunning = true;
+			_refreshRunning = true;
 
-			System.Threading.Thread thread = new System.Threading.Thread(new System.Threading.ThreadStart(DoRefreshRecentPhotos));
+			var thread = new System.Threading.Thread(DoRefreshRecentPhotos);
 			thread.Start();
 		}
 
 		private void DoRefreshRecentPhotos()
 		{
-            this.Invoke(new MethodInvoker(delegate()
-            {
-                RecentPhotosImages.Images.Clear();
-                RecentPhotosList.Items.Clear();
-            }));
+            Invoke(new MethodInvoker(() =>
+                                     {
+                                         RecentPhotosImages.Images.Clear();
+                                         RecentPhotosList.Items.Clear();
+                                     }));
 
-            string photoIds = Settings.Default.RecentPhotos;
+            var photoIds = Settings.Default.RecentPhotos;
 			if( String.IsNullOrEmpty(photoIds) ) 
 			{
-                this.Invoke(new MethodInvoker(delegate()
-                {
-                    RecentPhotosLabel.Text = "No recent photos to display.";
-                    RecentPhotosLabel.Visible = true;
-                }));
+                Invoke(new MethodInvoker(() =>
+                                         {
+                                             RecentPhotosLabel.Text = "No recent photos to display.";
+                                             RecentPhotosLabel.Visible = true;
+                                         }));
 				return;
 			}
 
-			string[] ids = photoIds.Split('|');
+			var ids = photoIds.Split('|');
 
-			Flickr f = FlickrFactory.GetInstance();
+			var f = FlickrFactory.GetInstance();
 
-			foreach(string photoId in ids)
+			foreach(var photoId in ids)
 			{
-				PhotoInfo info = f.PhotosGetInfo(photoId);
-				Uri url = new Uri(info.SquareThumbnailUrl);
+				var info = f.PhotosGetInfo(photoId);
+				var url = new Uri(info.SquareThumbnailUrl);
 
-                using (WebClient client = new WebClient())
+                using (var client = new WebClient())
                 {
-                    Image img = Image.FromStream(client.OpenRead(url));
-                    this.Invoke(new MethodInvoker(delegate()
-                    {
-                        RecentPhotosImages.Images.Add(img);
-                    }));
+                    var img = Image.FromStream(client.OpenRead(url));
+                    Invoke(new MethodInvoker(() => RecentPhotosImages.Images.Add(img)));
                 }
 
-				ListViewItem item = new ListViewItem(new string[] { info.Title, info.OwnerUserName, info.WebUrl }, RecentPhotosImages.Images.Count - 1);
-                this.Invoke(new MethodInvoker(delegate()
-                {
-                    RecentPhotosList.Items.Add(item);
-                }));
+				var item = new ListViewItem(new[] { info.Title, info.OwnerUserName, info.WebUrl }, RecentPhotosImages.Images.Count - 1);
+                Invoke(new MethodInvoker(() => RecentPhotosList.Items.Add(item)));
 			}
 
-            this.Invoke(new MethodInvoker(delegate()
-            {
-                RecentPhotosLabel.Visible = false;
-            }));
+            Invoke(new MethodInvoker(() => RecentPhotosLabel.Visible = false));
             
 
-			refreshRunning = false;
+			_refreshRunning = false;
 		}
 
 		private void RecentPhotosList_SelectedIndexChanged(object sender, System.EventArgs e)
@@ -1613,5 +1747,98 @@ namespace FlickrNetScreensaver
 		{
 			ProxyPanel.Enabled = ProxyDefined.Checked;
 		}
+
+        private void MoveDownButton_Click(object sender, EventArgs e)
+        {
+            if (FiltersListBox.SelectedItem == null)
+            {
+                return;
+            }
+
+            var idx = FiltersListBox.SelectedIndex;
+
+            if (idx == (FiltersListBox.Items.Count - 1))
+            {
+                return;
+            }
+
+            var elem = FiltersListBox.SelectedItem;
+            FiltersListBox.Items.RemoveAt(idx);
+            FiltersListBox.Items.Insert(idx + 1, elem);
+        }
+
+        private void DeleteButton_Click(object sender, EventArgs e)
+        {
+            if (FiltersListBox.SelectedItem == null)
+            {
+                return;
+            }
+
+            var idx = FiltersListBox.SelectedIndex;
+            FiltersListBox.Items.RemoveAt(idx);
+        }
+
+        private void MoveUpButton_Click(object sender, EventArgs e)
+        {
+            if (FiltersListBox.SelectedItem == null)
+            {
+                return;
+            }
+
+            var idx = FiltersListBox.SelectedIndex;
+
+            if (idx == 0)
+            {
+                return;
+            }
+
+            var elem = FiltersListBox.SelectedItem;
+            FiltersListBox.Items.RemoveAt(idx);
+            FiltersListBox.Items.Insert(idx - 1, elem);
+        }
+
+        private void AddFilter_Click(object sender, EventArgs e)
+        {
+            if (!CheckProxy()) return;
+
+            Settings.Default.Save();
+
+            if (!CheckAuth()) return;
+
+            PhotoFilter photoFilter = null;
+
+            try
+            {
+                if (SelectUser.Checked)
+                {
+                    if (!CheckUsername()) return;
+
+                    photoFilter = CreatePhotoFilterForUser();
+                }
+                if (SelectGroup.Checked)
+                {
+                    if (!CheckGroup()) return;
+
+                    photoFilter = CreatePhotoFilterForGroup();
+                }
+                if (SelectEveryone.Checked)
+                {
+                    if (!CheckEveryone()) return;
+
+                    photoFilter = CreatePhotoFilterForEveryone();
+                }
+            }
+            catch (FlickrException ex)
+            {
+                DialogResult res = MessageBox.Show("A problem occurred with Flickr and your settings could not be verified (" + ex.Message + ")", "Problem saving settings", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            catch (System.Net.WebException ex)
+            {
+                DialogResult res = MessageBox.Show("A problem occurred with Flickr and your settings could not be verified (" + ex.Message + ")", "Problem saving settings", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            FiltersListBox.Items.Add(photoFilter);
+        }
 	}
 }
