@@ -21,4 +21,4 @@ https://github.com/samjudson/flickr-net
 
 -----------------------------
 
-Latest Updates thanks to Sean Selitrennikoff
+Latest updates thanks to Sean Selitrennikoff
