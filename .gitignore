@@ -2,7 +2,7 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/v4/FlickrNetScreensaver/bin/Debug
-/v4/FlickrNetScreensaver/obj/Debug
+/v4/FlickrNetScreensaver/bin
+/v4/FlickrNetScreensaver/obj
 /v4/packages
 *.suo
