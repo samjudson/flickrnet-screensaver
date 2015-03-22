@@ -56,9 +56,9 @@ namespace FlickrNetScreensaver
 			}
 		}
 
-		public static string[] GetNames()
+		public static object[] GetNames()
 		{
-			return new string[] { "Plain", "Postcard", "Moving", "Stack" };
+			return new object[] { "Plain", "Postcard", "Moving", "Stack" };
 		}
 	}
 }

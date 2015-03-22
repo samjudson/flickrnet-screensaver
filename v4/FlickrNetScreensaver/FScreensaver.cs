@@ -3,6 +3,7 @@ using System.Drawing;
 using System.ComponentModel;
 using System.Windows.Forms;
 using FlickrNet;
+using FlickrNetScreensaver.Filters;
 using log4net;
 using FlickrNetScreensaver.Properties;
 using System.Collections.Generic;
@@ -361,7 +362,8 @@ namespace FlickrNetScreensaver
 		{
             var photos = new List<Photo>();
 
-            if (photoFilter.EveryoneFilter.filter == EveryoneFilter.EveryoneFilterType.Recent)
+
+            if (photoFilter.EveryoneFilter.Filter == EveryoneFilterType.Recent)
             {
                 const PhotoSearchExtras extras = PhotoSearchExtras.OwnerName | PhotoSearchExtras.AllUrls;
                 var photoCollection = _flickr.PhotosGetRecent(1, 500, extras);
@@ -371,11 +373,11 @@ namespace FlickrNetScreensaver
             }
             else
             {
-                if (photoFilter.EveryoneFilter.sortByInterestingness)
+                if (photoFilter.EveryoneFilter.SortByInterestingness)
                 {
                     var o = new PhotoSearchOptions
                                 {
-                                    Tags = photoFilter.EveryoneFilter.tags,
+                                    Tags = photoFilter.EveryoneFilter.Tags,
                                     TagMode = TagMode.AllTags,
                                     PerPage = 50,
                                     SortOrder =
@@ -393,7 +395,7 @@ namespace FlickrNetScreensaver
                 {
                     var o = new PhotoSearchOptions
                                 {
-                                    Tags = photoFilter.EveryoneFilter.tags,
+                                    Tags = photoFilter.EveryoneFilter.Tags,
                                     TagMode = TagMode.AllTags,
                                     PerPage = 500
                                 };

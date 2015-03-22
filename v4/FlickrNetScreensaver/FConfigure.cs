@@ -2,9 +2,11 @@ using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Forms;
 
 using FlickrNet;
+using FlickrNetScreensaver.Filters;
 using FlickrNetScreensaver.Properties;
 using System.Collections.Generic;
 using System.Net;
@@ -1423,7 +1425,7 @@ namespace FlickrNetScreensaver
             var filter = new PhotoFilter
                          {
                              FilterGroupType = FilterGroupType.User,
-                             UserFilter = new UserFilter {Username = Settings.Default.ShowUserUsername}
+                             Filter = new UserFilter {Username = Settings.Default.ShowUserUsername}
                          };
 
             if (Settings.Default.ShowUserType.Equals("All"))
@@ -1498,7 +1500,7 @@ namespace FlickrNetScreensaver
             var filter = new PhotoFilter
                                  {
                                      FilterGroupType = FilterGroupType.Group,
-                                     GroupFilter = new GroupFilter {GroupName = Settings.Default.ShowGroupName}
+                                     Filter = new GroupFilter {GroupName = Settings.Default.ShowGroupName}
                                  };
 
             return filter;
@@ -1535,30 +1537,33 @@ namespace FlickrNetScreensaver
 		    return true;
 		}
 
-        private PhotoFilter CreatePhotoFilterForEveryone()
-        {
-            var filter = new PhotoFilter
-                         {
-                             FilterGroupType = FilterGroupType.Everyone,
-                             EveryoneFilter = new EveryoneFilter()
-                         };
+	    private PhotoFilter CreatePhotoFilterForEveryone()
+	    {
+	        var filter = new EveryoneFilter();
+	        if (Settings.Default.ShowEveryoneType.Equals("Recent"))
+	        {
+	            filter.Filter = EveryoneFilterType.Recent;
+	            filter.SortByInterestingness = false;
+	            filter.Tags = "";
 
-            if (Settings.Default.ShowEveryoneType.Equals("Recent"))
-            {
-                filter.EveryoneFilter.filter = EveryoneFilter.EveryoneFilterType.Recent;
-                filter.EveryoneFilter.sortByInterestingness = false;
-                filter.EveryoneFilter.tags = "";
-                return filter;
-            }
+	        }
+	        else
+	        {
 
-            // Tags
-            filter.EveryoneFilter.filter = EveryoneFilter.EveryoneFilterType.Tags;
-            filter.EveryoneFilter.sortByInterestingness = Settings.Default.ShowEveryoneTagInteresting;
-            filter.EveryoneFilter.tags = Settings.Default.ShowEveryoneTag;
-            return filter;
-        }
+	            // Tags
+	            filter.Filter = EveryoneFilterType.Tags;
+	            filter.SortByInterestingness = Settings.Default.ShowEveryoneTagInteresting;
+	            filter.Tags = Settings.Default.ShowEveryoneTag;
+	        }
 
-		private void BtnCancelClick(object sender, System.EventArgs e)
+	        return new PhotoFilter
+	               {
+	                   FilterGroupType = FilterGroupType.Everyone,
+	                   Filter = filter
+	               };
+	    }
+
+	    private void BtnCancelClick(object sender, System.EventArgs e)
 		{
 			Close();
 		}
@@ -1830,12 +1835,12 @@ namespace FlickrNetScreensaver
             }
             catch (FlickrException ex)
             {
-                DialogResult res = MessageBox.Show("A problem occurred with Flickr and your settings could not be verified (" + ex.Message + ")", "Problem saving settings", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("A problem occurred with Flickr and your settings could not be verified (" + ex.Message + ")", "Problem saving settings", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
-            catch (System.Net.WebException ex)
+            catch (WebException ex)
             {
-                DialogResult res = MessageBox.Show("A problem occurred with Flickr and your settings could not be verified (" + ex.Message + ")", "Problem saving settings", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("A problem occurred with Flickr and your settings could not be verified (" + ex.Message + ")", "Problem saving settings", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
             FiltersListBox.Items.Add(photoFilter);

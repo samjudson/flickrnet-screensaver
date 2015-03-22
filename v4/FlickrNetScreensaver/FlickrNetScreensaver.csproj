@@ -105,13 +105,19 @@
     <Compile Include="FConfigure.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Filters\EveryoneFilter.cs" />
+    <Compile Include="Filters\EveryoneFilterType.cs" />
+    <Compile Include="Filters\FilterGroupType.cs" />
+    <Compile Include="Filters\GroupFilter.cs" />
+    <Compile Include="Filters\PhotoFilter.cs" />
+    <Compile Include="Filters\UserFilter.cs" />
+    <Compile Include="Filters\UserFilterType.cs" />
     <Compile Include="FlickrFactory.cs" />
     <Compile Include="FScreensaver.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ImageManager.cs" />
     <Compile Include="IPictureDrawer.cs" />
-    <Compile Include="PhotoFilter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="DrawOptions\AbstractOptions.resx">
